@@ -9,6 +9,15 @@ import {AngularFirestoreModule} from '@angular/fire/compat/firestore';
 import {AngularFireStorageModule} from '@angular/fire/compat/storage';
 import {AngularFireAuth, AngularFireAuthModule} from '@angular/fire/compat/auth';
 import {environment} from "../environments/environment.development";
+import { NavbarComponent } from './common/navbar/navbar.component';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import {MatMenuModule} from '@angular/material/menu';
+import {MatIconModule} from '@angular/material/icon';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {MatButtonModule} from '@angular/material/button';
+import { ReactiveFormsModule } from '@angular/forms';
+
+
 
 export function initializeApp(afAuth: AngularFireAuth): () => Promise<null> {
   return () => {
@@ -20,7 +29,8 @@ export function initializeApp(afAuth: AngularFireAuth): () => Promise<null> {
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    NavbarComponent
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),
@@ -28,7 +38,14 @@ export function initializeApp(afAuth: AngularFireAuth): () => Promise<null> {
     AngularFirestoreModule,
     AngularFireStorageModule,
     BrowserModule,
-    AppRoutingModule
+    BrowserAnimationsModule,
+    ReactiveFormsModule,
+    AppRoutingModule,
+    MatToolbarModule,
+    MatMenuModule,
+    MatIconModule,
+    MatButtonModule
+    
   ],
   providers: [{
     provide: APP_INITIALIZER,
