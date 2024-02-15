@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatCardModule} from '@angular/material/card';
@@ -14,6 +14,8 @@ import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {MatDialogModule} from '@angular/material/dialog';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatInputModule } from '@angular/material/input';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+
 
 
 const MODULES = [
@@ -31,7 +33,8 @@ const MODULES = [
   MatNativeDateModule,
   MatAutocompleteModule,
   MatDialogModule,
-  MatInputModule
+  MatInputModule,
+  DragDropModule
   
 ]
 
@@ -41,6 +44,8 @@ const MODULES = [
   providers: [  
     MatDatepickerModule,  
   ],
+
+  schemas: [ CUSTOM_ELEMENTS_SCHEMA ],
   
   imports: [...MODULES, CommonModule],
   exports: [...MODULES],

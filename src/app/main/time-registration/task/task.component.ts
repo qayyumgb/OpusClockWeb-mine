@@ -1,63 +1,23 @@
-// Common
-import { Component, Inject, OnInit, afterRender } from '@angular/core';
-
-// Angular
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { Component, Inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { AsyncPipe, CommonModule } from '@angular/common';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatCardModule } from '@angular/material/card';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatSelectModule } from '@angular/material/select';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatExpansionModule } from '@angular/material/expansion';
+import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatDialog } from '@angular/material/dialog';
-import { MatTabsModule } from '@angular/material/tabs';
-import { JsonPipe } from '@angular/common';
-import { CdkListbox, CdkOption } from '@angular/cdk/listbox';
-import { CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
-import { CdkDrag, moveItemInArray } from '@angular/cdk/drag-drop';
-import { CdkDragHandle } from '@angular/cdk/drag-drop';
-import { DateAdapter, MAT_DATE_FORMATS } from '@angular/material/core';
-import { MAT_DATE_LOCALE } from '@angular/material/core';
-
-// Components
-
-// Helpers
-import {
-  time,
-  timeAddDate,
-  timeAsSeconds,
-  DATE_FORMATS,
-  TIME_FORMAT,
-} from '../../helpers/time';
-import {
-  Scheme,
-  Task,
-  TaskOption,
-  BreakScheme,
-  Worker,
-} from '../../helpers/interfaces';
-import { workerOptions, breakScheme, tasksOptions } from '../../helpers/data';
 import * as moment from 'moment';
+import { breakScheme, tasksOptions, workerOptions } from 'src/app/common/helpers/data';
+import { TIME_FORMAT, time, timeAddDate, timeAsSeconds } from 'src/app/common/helpers/time';
+import { BreakScheme, Task } from 'src/app/common/interfaces/time-interface';
 
 @Component({
-  selector: 'app-tasks',
-  templateUrl: './tasks.component.html',
-  styleUrls: ['./tasks.component.scss'],
+  selector: 'app-task',
+  templateUrl: './task.component.html',
+  styleUrls: ['./task.component.scss']
 })
-export class TasksComponent implements OnInit {
+export class TaskComponent implements OnInit {
   workerSelected = workerOptions[0];
   workerOptions = workerOptions;
 
-  breakSchemeSelected: BreakScheme | undefined;
+  breakSchemeSelected: BreakScheme;
 
   tasks: Task[] = [];
 
@@ -67,7 +27,7 @@ export class TasksComponent implements OnInit {
     endTime: new FormControl<string | null>('16:00'),
   });
 
-  dateHint: string | undefined;
+  dateHint: string;
   presenceStartTimeBefore = '07:00';
   presenceEndTimeBefore = '16:01';
   presenceTotalTime = '00:00';
@@ -146,7 +106,7 @@ export class TasksComponent implements OnInit {
     let proceed = true;
 
     while (proceed) {
-      let nextBreak = this.breakSchemeSelected?.scheme.filter((brk) => {
+      let nextBreak = this.breakSchemeSelected.scheme.filter((brk) => {
         if (!brk.fromMoment) return;
         return brk.fromMoment > time(lastFrom);
       })[0];

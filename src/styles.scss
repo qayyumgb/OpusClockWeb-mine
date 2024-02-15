@@ -1,5 +1,5 @@
 @import './material-dark-theme.scss';
-// @import './bootstrap.css';
+@import './bootstrap.css';
 
 html,
 body {
@@ -9,4 +9,8 @@ body {
 body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+mat-hint{
+  font-size: 12px;
 }

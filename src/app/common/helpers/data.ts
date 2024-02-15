@@ -1,4 +1,4 @@
-import { Scheme, Task, TaskOption, BreakScheme, Worker } from './interfaces';
+import { BreakScheme, TaskOption, Worker } from "../interfaces/time-interface";
 
 export const workerOptions: Worker[] = [
   { name: 'Bart', id: 'd7f4a8d4-cf67-424d-b698-f475785810b4' },

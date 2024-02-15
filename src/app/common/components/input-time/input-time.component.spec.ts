@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TasksComponent } from './tasks.component';
+import { InputTimeComponent } from './input-time.component';
 
-describe('TasksComponent', () => {
-  let component: TasksComponent;
-  let fixture: ComponentFixture<TasksComponent>;
+describe('InputTimeComponent', () => {
+  let component: InputTimeComponent;
+  let fixture: ComponentFixture<InputTimeComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [TasksComponent]
+      declarations: [InputTimeComponent]
     });
-    fixture = TestBed.createComponent(TasksComponent);
+    fixture = TestBed.createComponent(InputTimeComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

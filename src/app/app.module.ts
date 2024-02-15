@@ -30,7 +30,7 @@ export function initializeApp(afAuth: AngularFireAuth): () => Promise<null> {
 @NgModule({
   declarations: [
     AppComponent,
-    NavbarComponent
+    NavbarComponent,
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),
