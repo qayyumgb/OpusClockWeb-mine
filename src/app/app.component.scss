@@ -1,14 +1,30 @@
-.main-dashboard{
+#app-main{
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+.main-screen{
     display: flex;
-    flex-direction: column;
     height: 100%;
 
-    .main-navigation{
-        flex: 0 1 auto;
+    .app-navigation{
+        width: 13rem;
+        background-color: #121212;
+        flex: 0 0 auto;
+        overflow: auto;
     }
-    .main-body{
+
+    .app-body{
         flex: 1 1 auto;
         height: 100%;
         overflow: auto;
+
+        .app-body-nav{
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background-color: #000000;
+            box-shadow: 0px 5px 23px 11px #000000;
+        }
     }
 }

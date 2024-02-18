@@ -9,13 +9,15 @@ import {AngularFirestoreModule} from '@angular/fire/compat/firestore';
 import {AngularFireStorageModule} from '@angular/fire/compat/storage';
 import {AngularFireAuth, AngularFireAuthModule} from '@angular/fire/compat/auth';
 import {environment} from "../environments/environment.development";
-import { NavbarComponent } from './common/navbar/navbar.component';
+import { NavbarComponent } from './common/components/navbar/navbar.component';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatIconModule} from '@angular/material/icon';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MatButtonModule} from '@angular/material/button';
+import {MatBadgeModule} from '@angular/material/badge';
 import { ReactiveFormsModule } from '@angular/forms';
+import { SideNavbarComponent } from './common/components/side-navbar/side-navbar.component';
 
 
 
@@ -31,6 +33,7 @@ export function initializeApp(afAuth: AngularFireAuth): () => Promise<null> {
   declarations: [
     AppComponent,
     NavbarComponent,
+    SideNavbarComponent,
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),
@@ -44,7 +47,8 @@ export function initializeApp(afAuth: AngularFireAuth): () => Promise<null> {
     MatToolbarModule,
     MatMenuModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    MatBadgeModule
     
   ],
   providers: [{

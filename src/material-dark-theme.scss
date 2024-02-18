@@ -116,7 +116,7 @@ $accent: mat.define-palette($md-accent, A200, A100, A400);
 $background-color: map_get($mat-blue-grey, 100);
 
 // The warn palette is optional (defaults to red).
-$warn: mat.define-palette($mat-deep-orange);
+// $warn: mat.define-palette($mat-deep-orange);
 
 // Create the theme object. A theme consists of configurations for individual
 // theming systems such as "color" or "typography".
@@ -125,7 +125,6 @@ $theme: mat.define-dark-theme(
     color: (
       primary: $primary,
       accent: $accent,
-      warn: $warn,
     ),
   )
 );
@@ -201,7 +200,7 @@ $theme: map_merge(
 }
 
 .matcolorprimary{
-  background-color: #303030;
+  background-color: #000000;
 }
 
 .mat-mdc-tab-nav-bar {
@@ -220,3 +219,29 @@ $theme: map_merge(
   --mat-tab-header-active-hover-indicator-color: #00f8a2;
 }
 
+.mat-app-background{
+  background-color: #000000;
+}
+
+.mat-mdc-card{
+  --mdc-elevated-card-container-color: #121212;
+
+  &.is-card-nested{
+    --mdc-elevated-card-container-color: #242424;
+  }
+}
+
+.mat-mdc-form-field-focus-overlay{
+  background-color: inherit;
+}
+
+:root{
+  --mdc-filled-text-field-container-color: inherit;
+  --mat-datepicker-calendar-container-background-color: #121212;
+  --mat-menu-container-color: #121212;
+}
+
+::-webkit-scrollbar { width: 5px; height: 3px;}
+::-webkit-scrollbar-track {  background-color: #646464;}
+::-webkit-scrollbar-track-piece { background-color: #000;}
+::-webkit-scrollbar-thumb { height: 50px; background-color: #666; border-radius: 3px;}
