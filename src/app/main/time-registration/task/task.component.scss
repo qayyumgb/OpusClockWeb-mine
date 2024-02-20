@@ -237,22 +237,19 @@
         }
     }
 }
+.draggable-item{
+    display: flex;
+    gap: 1rem;
 
+    .drag-handle{
+        margin-top: 1rem;
+        cursor: grab;
+    }
+}
 .draggable-task-list{
 
     .draggable-task-card{
         padding-top: 12px;
-    }
-
-    .draggable-item{
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
-
-        .drag-handle{
-            margin-top: 1rem;
-            cursor: grab;
-        }
     }
 }
 
