@@ -1,12 +1,12 @@
 <div class="time-registration__wrapper">
-    <div class="time-registration__content mt-4">
+    <div class="time-registration__content mt-3">
         <label class="title mb-3">Date and Time</label>
         <mat-card class="time-registration__card">
             <mat-card-content>
-                <div [formGroup]="presence">
+                <div [formGroup]="presence" class="max-w-600">
                     <div class="mb-3">
-                        <label for="" class="d-block mb-3">Set date</label>
-                        <mat-form-field class="date-field" appearance="outline">
+                        <label for="" class="d-block mb-3 font-xs-18">Set date</label>
+                        <mat-form-field class="date-field w-100" appearance="outline">
                             <mat-label>Choose a date</mat-label>
                             <input matInput [matDatepicker]="picker" formControlName="date" />
                             <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
@@ -15,10 +15,10 @@
                         </mat-form-field>
                     </div>
                     <div class="mb-3">
-                        <label for="" class="d-block mb-3">Set time</label>
+                        <label for="" class="d-block mb-3 font-xs-18">Set time</label>
                         <div class="time-inputs">
-                            <app-input-time label="From" formControlName="startTime" hint=""></app-input-time>
-                            <app-input-time label="Till" formControlName="endTime" hint=""></app-input-time>
+                            <app-input-time label="From" class="flex-grow-1" formControlName="startTime" hint=""></app-input-time>
+                            <app-input-time label="Till" class="flex-grow-1" formControlName="endTime" hint=""></app-input-time>
                         </div>
                     </div>
                 </div>
@@ -27,12 +27,12 @@
         <div class="total-timing-wrapper p-3">
             <div class="total-time">
                 <label for="">Total time</label>
-                <h5>{{presenceTotalTime}}</h5>
+                <h5 class="font-xs-18">{{presenceTotalTime}}</h5>
             </div>
         </div>
     </div>
 
-    <div class="time-registration__content mt-4">
+    <div class="time-registration__content mt-1">
         <label class="title mb-3">Tasks
             <ng-container *ngIf="tasks.length > 0">
                 <button mat-button (click)="clearTasks()" color="accent" matTooltip="Remove all tasks">
@@ -90,7 +90,7 @@
 
                 <div class="add-task-card">
                     <div>
-                        <p class="mb-4">Click Create Tasks button to automatically create the tasks and breaks. 
+                        <p class="mb-4 font-xs-13">Click Create Tasks button to automatically create the tasks and breaks. 
                             <br>Or<br> 
                             create a single task by pressing Single Task.</p>
                             <div class="add-task-btns">
@@ -107,15 +107,15 @@
         <div class="total-timing-wrapper p-3">
             <div class="total-time">
                 <label for="">Remaining</label>
-                <h5>{{totalTimeRemaining}}</h5>
+                <h5 class="font-xs-18">{{totalTimeRemaining}}</h5>
             </div>
             <div class="total-time">
                 <label for="">Tasks</label>
-                <h5>{{totalTimeTasksSpecified}}</h5>
+                <h5 class="font-xs-18">{{totalTimeTasksSpecified}}</h5>
             </div>
             <div class="total-time">
                 <label for="">Break</label>
-                <h5>{{totalTimeBreaksSpecified}}</h5>
+                <h5 class="font-xs-18">{{totalTimeBreaksSpecified}}</h5>
             </div>
         </div>
     </div>

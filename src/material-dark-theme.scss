@@ -219,15 +219,14 @@ $theme: map_merge(
   --mat-tab-header-active-focus-indicator-color: #00f8a2;
   --mat-tab-header-active-hover-indicator-color: #00f8a2;
 }
-
 .mat-app-background{
-  background-color: #111b21; 
+  background-color: #131a23; 
 }
 
 .mat-mdc-card{
   border-radius: 10px !important;
   box-shadow: 0px 3px 7px -2px #000000 !important;
-  background-color: #142027 !important;
+  background-color: #1b2429 !important;
 }
 
 .mdc-text-field--filled:not(.mdc-text-field--disabled){
@@ -243,5 +242,6 @@ label.title{
 }
 
 .card-elevated{
-  background-color: #18272f !important;
+  background-color: #243036 !important;
+  box-shadow: none !important;
 }
