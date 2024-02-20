@@ -1,13 +1,13 @@
-/* .example-form {
-  min-width: 150px;
-  max-width: 500px;
-  width: 100%;
-  margin-top: 16px;
-}
+// /* .example-form {
+//   min-width: 150px;
+//   max-width: 500px;
+//   width: 100%;
+//   margin-top: 16px;
+// }
 
-.example-full-width {
-  width: 100%;
-} */
+// .example-full-width {
+//   width: 100%;
+// } */
 
 // .container {
 //     margin: 10px;
@@ -191,6 +191,7 @@
 //     }
 // }
 
+
 .time-inputs{
     display: flex;
     flex-wrap: wrap;
@@ -237,6 +238,11 @@
         }
     }
 }
+
+.task-card-selected{
+    border-color:#00F8A2 !important;
+}
+
 .draggable-item{
     display: flex;
     gap: 1rem;
@@ -250,6 +256,7 @@
 
     .draggable-task-card{
         padding-top: 12px;
+        border: 2px solid #243036;
     }
 }
 
@@ -287,4 +294,13 @@
 label.title{
     font-size: 18px;
     font-weight: 500;
+}
+
+.time-registration{
+
+    &__btn-group{
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+    }
 }

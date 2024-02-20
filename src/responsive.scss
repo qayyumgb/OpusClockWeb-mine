@@ -1,7 +1,8 @@
 @media (max-width: 991.98px) {
-    .presence-container{
-        & > mat-form-field,app-input-time{
-            width: 100%;
+    .draggable-task-card{
+
+        .duration{
+            max-width: 140px;
         }
     }
 }
@@ -32,6 +33,16 @@
                 height: 36px !important;
                 font-size: 33px !important;
             }
+        }
+    }
+    .draggable-task-card{
+
+        .mat-mdc-card-content{
+            padding-left: 6px;
+        }
+
+        .draggable-item{
+            gap: 5px !important;
         }
     }
 }
