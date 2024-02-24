@@ -59,10 +59,10 @@ export class TaskComponent implements OnInit {
     this.presence.controls.date.valueChanges.subscribe((value) => {
       this.setDateHint();
     });
+    this.presence.controls.date.setValue(moment());
   }
 
   ngAfterViewInit() {
-    this.presence.controls.date.setValue(moment());
   }
 
   setDateHint() {

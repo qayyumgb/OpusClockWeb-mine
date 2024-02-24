@@ -14,3 +14,21 @@ body {
 mat-hint{
   font-size: 12px;
 }
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #131a23;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #424242;
+  border-radius: 15px;
+}
+
+  ::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

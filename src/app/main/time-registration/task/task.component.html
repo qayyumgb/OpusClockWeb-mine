@@ -104,7 +104,7 @@
                 </ng-container>
 
 
-                <div class="add-task-card">
+                <div class="add-task-card" *ngIf="tasks.length === 0">
                     <div>
                         <p class="mb-4 font-xs-13">Click Create Tasks button to automatically create the tasks and breaks. 
                             <br>Or<br> 
