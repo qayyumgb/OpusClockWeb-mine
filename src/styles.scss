@@ -1,4 +1,5 @@
 @import './material-dark-theme.scss';
+@import './bootstrap.css';
 
 html,
 body {
@@ -8,4 +9,19 @@ body {
 body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+mat-hint{
+  font-size: 12px;
+}
+.cstm-primary{
+  background-color: #00ffa7 !important;
+  color: #131a23 !important;
+  transition: 0.3s ease all !important;
+  &:hover{
+    background-color: #00cf87 !important;
+  }
+}
+.cstm-color{
+  color: #00ffa7;
 }

@@ -1,0 +1,14 @@
+.main-dashboard{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    .main-navigation{
+        flex: 0 1 auto;
+    }
+    .main-body{
+        flex: 1 1 auto;
+        height: 100%;
+        overflow: auto;
+    }
+}

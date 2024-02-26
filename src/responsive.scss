@@ -1,0 +1,48 @@
+@media (max-width: 991.98px) {
+    .draggable-task-card{
+
+        .duration{
+            max-width: 140px;
+        }
+    }
+}
+
+@media (max-width: 767.98px) {
+    body{
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 574.98px) {
+    .font-xs-13{
+        font-size: 13px;
+    }
+    .font-xs-22{
+        font-size: 22px;
+    }
+    .font-xs-18{
+        font-size: 18px;
+    }
+    .font-xs-16{
+        font-size: 16px;
+    }
+    .add-task-btns{
+        .add-task-btn{
+            .info-icon{
+                width: 36px !important;
+                height: 36px !important;
+                font-size: 33px !important;
+            }
+        }
+    }
+    .draggable-task-card{
+
+        .mat-mdc-card-content{
+            padding-left: 6px;
+        }
+
+        .draggable-item{
+            gap: 5px !important;
+        }
+    }
+}

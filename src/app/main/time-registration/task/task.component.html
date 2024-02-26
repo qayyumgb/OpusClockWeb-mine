@@ -1,0 +1,250 @@
+<div class="time-registration__wrapper">
+    <div class="time-registration__content mt-3">
+        <label class="title mb-3">Date and Time</label>
+        <mat-card class="time-registration__card">
+            <mat-card-content>
+                <div [formGroup]="presence" class="max-w-600">
+                    <div class="mb-3">
+                        <label for="" class="d-block mb-3 font-xs-18">Set date</label>
+                        <mat-form-field class="date-field w-100" appearance="outline">
+                            <mat-label>Choose a date</mat-label>
+                            <input matInput [matDatepicker]="picker" formControlName="date" />
+                            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                            <mat-datepicker #picker></mat-datepicker>
+                            <mat-hint>{{dateHint}}</mat-hint>
+                        </mat-form-field>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="d-block mb-3 font-xs-18">Set time</label>
+                        <div class="time-inputs">
+                            <app-input-time label="From" class="flex-grow-1" formControlName="startTime" hint=""></app-input-time>
+                            <app-input-time label="Till" class="flex-grow-1" formControlName="endTime" hint=""></app-input-time>
+                        </div>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+        <div class="total-timing-wrapper p-3">
+            <div class="total-time">
+                <label for="">Total time</label>
+                <h5 class="font-xs-18 main-color">{{presenceTotalTime}}</h5>
+            </div>
+        </div>
+    </div>
+
+    <div class="time-registration__content mt-1">
+        <div class="d-flex align-items-center">
+            <label class="title mb-3">Tasks</label>
+            <span class="flex-grow-1"></span>
+
+            <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu" xPosition="before">
+                <button *ngIf="tasks.length > 0" mat-menu-item (click)="clearTasks()" color="accent">
+                  <mat-icon>delete</mat-icon>
+                  <span>Remove all tasks</span>
+                </button>
+                <button *ngIf="tasks.length > 0" mat-menu-item (click)="removeTask('AUTO')" color="accent">
+                  <mat-icon class="material-symbols-outlined">delete</mat-icon>
+                  
+                  <span>Remove selected task</span>
+                </button>
+                <button mat-menu-item (click)="addTask('AUTO')" color="accent">
+                  <mat-icon>add</mat-icon>
+                  <span>Add new task</span>
+                </button>
+              </mat-menu>
+
+        </div>
+        <mat-card class="time-registration__card">
+            <mat-card-content>
+
+                <div cdkDropList class="draggable-task-list" (cdkDropListDropped)="dropTask($event)">
+                    <ng-container *ngFor="let task of tasks; let idx = index">
+                        <mat-card cdkDrag class="draggable-task-card card-elevated mb-3" [class]="task.class"
+                        (click)="setLastSelectedTask(idx)">
+                            <mat-card-content>
+                                <div class="draggable-item">
+                                    <mat-icon cdkDragHandle class="drag-handle flex-shrink-0">drag_indicator</mat-icon>
+            
+                                    <app-input-time class="duration" label="Duration" [(ngModel)]="task.duration"
+                                    hint="{{task.startTime}} - {{task.endTime}}"
+                                    (change)="changedTaskDuration($event)"></app-input-time>
+            
+                                    <mat-form-field class="task flex-grow-1" appearance="outline">
+                                        <mat-label>Task</mat-label>
+                                        <input type="text" matInput [matAutocomplete]="auto" autoActiveFirstOption="true"
+                                            (input)="tasksFilter($event, idx)" (focus)="tasksFilter($event, idx)"
+                                            [(ngModel)]="task.selectedOption" />
+                                        <mat-autocomplete requireSelection #auto="matAutocomplete" [displayWith]="displayTaskName">
+                                            <ng-container *ngFor="let option of task.filteredOptions;">
+                                                <mat-option [value]="option">{{option.name}}</mat-option>
+                                            </ng-container>
+                                        </mat-autocomplete>
+                                    </mat-form-field>
+            
+                                    <button mat-icon-button class="mt-1 d-lg-block d-none" (click)="removeTask(idx)"
+                                        matTooltip="Remove selected task">
+                                        <mat-icon>remove</mat-icon>
+                                    </button>
+                                    <button mat-icon-button class="mt-1 d-lg-block d-none" (click)="addTask(idx)"
+                                        matTooltip="Add a task after select task">
+                                        <mat-icon>add</mat-icon>
+                                    </button>
+                                </div>
+                            </mat-card-content>
+                        </mat-card>
+                    </ng-container>
+                </div>
+
+                <ng-container *ngIf="tasks.length > 0 && pauseCount ===0">
+                    <button mat-stroked-button color="basic" class="mb-4" (click)="addRemainingAsPause()">
+                        Add remaining pause
+                    </button>
+                </ng-container>
+
+
+                <div class="add-task-card">
+                    <div>
+                        <p class="mb-4 font-xs-13">Click Create Tasks button to automatically create the tasks and breaks. 
+                            <br>Or<br> 
+                            create a single task by pressing Single Task.</p>
+                            <div class="add-task-btns">
+                                <button class="add-task-btn" mat-button (click)="addTask(0)">
+                                    <mat-icon class="info-icon">add</mat-icon>Single task</button>
+                                <button class="add-task-btn" mat-button (click)="tasksGenerator()">
+                                    <mat-icon class="info-icon">post_add</mat-icon>Create tasks</button>
+                            </div>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <div class="total-timing-wrapper p-3">
+            <div class="total-time">
+                <label for="">Remaining</label>
+                <h5 class="font-xs-18 main-color">{{totalTimeRemaining}}</h5>
+            </div>
+            <div class="total-time">
+                <label for="">Tasks</label>
+                <h5 class="font-xs-18 main-color">{{totalTimeTasksSpecified}}</h5>
+            </div>
+            <div class="total-time">
+                <label for="">Break</label>
+                <h5 class="font-xs-18 main-color">{{totalTimeBreaksSpecified}}</h5>
+            </div>
+        </div>
+    </div>
+
+
+    <mat-card class="time-registration__footer p-0">
+        <mat-card-content>
+            <div class="d-flex justify-content-end time-registration__btn-group">
+                <button mat-stroked-button><mat-icon class="info-icon">cancel</mat-icon> CANCEL</button>
+                <button mat-stroked-button color="basic" [disabled]="saveDisabled" (click)="saveTasks()">
+                    <mat-icon class="info-icon">save</mat-icon> SAVE</button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+    
+</div>
+
+
+
+<!-- <mat-card-content class="p-0">
+    <div>
+        <div class="task-header">
+            <h5>Tasks</h5>
+            <button mat-icon-button (click)="clearTasks()" matTooltip="Remove all tasks">
+                <mat-icon>clear_all</mat-icon>
+            </button>
+            <button mat-icon-button class="presence-button-header" (click)="removeTask('AUTO')"
+                matTooltip="Remove selected task">
+                <mat-icon>remove</mat-icon>
+            </button>
+            <button mat-icon-button class="presence-button-header" (click)="addTask('AUTO')"
+                matTooltip="Add a task after select task">
+                <mat-icon>add</mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <mat-card *ngIf="tasks.length === 0" class="task-card">
+        <mat-card-content>
+            <mat-icon class="info-icon">info</mat-icon>
+            <p class="mt-3">
+                Click on the CREATE TASKS button to automaticly create the tasks and
+                breaks. Or create a single task by pressing on SINGLE TASK.
+            </p>
+        </mat-card-content>
+
+        <mat-card-actions align="end">
+            <button mat-button (click)="addTask(0)">SINGLE TASKS</button>
+            <button mat-stroked-button color="primary" (click)="tasksGenerator()">
+                CREATE TASKS
+            </button>
+        </mat-card-actions>
+    </mat-card>
+    <div cdkDropList class="example-list" (cdkDropListDropped)="dropTask($event)">
+        <ng-container *ngFor="let task of tasks; let idx = index">
+            <mat-card cdkDrag class="task-card" [class]="task.class">
+                <mat-card-content>
+                    <div class="task-container" (click)="setLastSelectedTask(idx)">
+                        <mat-icon cdkDragHandle class="drag-handle" fontIcon="drag_handle"></mat-icon>
+
+                        <app-input-time class="duration" label="Duration" [(ngModel)]="task.duration"
+                        hint="{{task.startTime}} - {{task.endTime}}"
+                        (change)="changedTaskDuration($event)"></app-input-time>
+
+                        <mat-form-field class="task">
+                            <mat-label>Task</mat-label>
+                            <input type="text" matInput [matAutocomplete]="auto" autoActiveFirstOption="true"
+                                (input)="tasksFilter($event, idx)" (focus)="tasksFilter($event, idx)"
+                                [(ngModel)]="task.selectedOption" />
+                            <mat-autocomplete requireSelection #auto="matAutocomplete" [displayWith]="displayTaskName">
+                                <ng-container *ngFor="let option of task.filteredOptions;">
+                                    <mat-option [value]="option">{{option.name}}</mat-option>
+                                </ng-container>
+                            </mat-autocomplete>
+                        </mat-form-field>
+
+                        <button mat-icon-button class="presence-button" (click)="removeTask(idx)"
+                            matTooltip="Remove selected task">
+                            <mat-icon>remove</mat-icon>
+                        </button>
+                        <button mat-icon-button class="presence-button" (click)="addTask(idx)"
+                            matTooltip="Add a task after select task">
+                            <mat-icon>add</mat-icon>
+                        </button>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </ng-container>
+    </div>
+
+    <mat-card *ngIf="tasks.length > 0 && pauseCount ===0" class="task-card">
+        <mat-card-actions align="start">
+            <button mat-stroked-button color="primary" (click)="addRemainingAsPause()">
+                Add remaining pause
+            </button>
+        </mat-card-actions>
+    </mat-card>
+
+    <mat-card-actions class="action-buttons" align="end">
+        <div class="remaining-container">
+            <p>
+                Remaining {{totalTimeRemaining}} <br />Tasks {{totalTimeTasksSpecified}}
+                Break {{totalTimeBreaksSpecified}}
+            </p>
+        </div>
+
+        <span class="spacer"></span>
+
+        <button mat-button>CANCEL</button>
+        <button mat-raised-button color="primary" [disabled]="saveDisabled" (click)="saveTasks()">
+            SAVE
+        </button>
+
+    </mat-card-actions>
+</mat-card-content> -->
