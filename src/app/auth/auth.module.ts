@@ -4,8 +4,11 @@ import { CommonModule } from '@angular/common';
 import { AuthRoutingModule } from './auth-routing.module';
 import { LoginComponent } from './login/login.component';
 import { SharedModule } from '../shared/shared.module';
+<<<<<<< HEAD
 import {AuthService} from '../common/services/auth.service';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+=======
+>>>>>>> mukhtar_branch
 
 
 @NgModule({
@@ -15,11 +18,16 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
   imports: [
     CommonModule,
     AuthRoutingModule,
+<<<<<<< HEAD
     SharedModule,
     MatSnackBarModule
   ],
   providers: [
     AuthService
   ],
+=======
+    SharedModule
+  ]
+>>>>>>> mukhtar_branch
 })
 export class AuthModule { }

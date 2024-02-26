@@ -1,7 +1,10 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { LoginComponent } from './login/login.component';
+<<<<<<< HEAD
 import {MatSnackBar} from '@angular/material/snack-bar';
+=======
+>>>>>>> mukhtar_branch
 
 const routes: Routes = [
   {
