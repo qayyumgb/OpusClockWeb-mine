@@ -1,11 +1,20 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { TimeRegistrationComponent } from './time-registration/time-registration.component';
+import { MainLayoutComponent } from './main-layout/main-layout.component';
 
 const routes: Routes = [
+  { path: '', pathMatch: 'full', redirectTo: 'time-registration' },
   {
-    path:'',
-    component: TimeRegistrationComponent
+    path: '',
+    component: MainLayoutComponent,
+    children: [
+      {
+        path:'time-registration',
+      component: TimeRegistrationComponent
+      },
+    ]
+    
   }
 ];
 

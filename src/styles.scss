@@ -31,4 +31,15 @@ mat-hint{
 
   ::-webkit-scrollbar-thumb:hover {
   background: #555;
+  }
+.cstm-primary{
+  background-color: #00ffa7 !important;
+  color: #131a23 !important;
+  transition: 0.3s ease all !important;
+  &:hover{
+    background-color: #00cf87 !important;
+  }
+}
+.cstm-color{
+  color: #00ffa7;
 }

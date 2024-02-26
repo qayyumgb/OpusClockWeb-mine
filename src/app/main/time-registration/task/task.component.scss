@@ -252,20 +252,20 @@
         cursor: grab;
     }
 }
-.draggable-task-list{
-
-    .draggable-task-card{
-        padding-top: 12px;
-        border: 2px solid #243036;
-    }
+.draggable-task-card{
+    padding-top: 12px;
+    border: 2px solid #243036;
 }
 
 .total-timing-wrapper{
-
+    display: flex;
+    gap: 20px;
+    justify-content: end;
+    flex-wrap: wrap;
     .total-time{
         display: flex;
         align-items: center;
-        gap: 1rem;
+        gap: 0.65rem;
         justify-content: flex-end;
     }
 }
@@ -295,7 +295,9 @@ label.title{
     font-size: 18px;
     font-weight: 500;
 }
-
+.main-color{
+    color: #00ffa7;
+}
 .time-registration{
 
     &__btn-group{
@@ -303,4 +305,10 @@ label.title{
         justify-content: flex-end;
         gap: 1rem;
     }
+}
+.time-registration__footer{
+    position: sticky;
+    margin: auto;
+    bottom: 0;
+    z-index: 3;
 }

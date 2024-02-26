@@ -9,7 +9,6 @@ import {AngularFirestoreModule} from '@angular/fire/compat/firestore';
 import {AngularFireStorageModule} from '@angular/fire/compat/storage';
 import {AngularFireAuth, AngularFireAuthModule} from '@angular/fire/compat/auth';
 import {environment} from "../environments/environment.development";
-import { NavbarComponent } from './common/navbar/navbar.component';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatIconModule} from '@angular/material/icon';
@@ -30,7 +29,6 @@ export function initializeApp(afAuth: AngularFireAuth): () => Promise<null> {
 @NgModule({
   declarations: [
     AppComponent,
-    NavbarComponent,
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),
