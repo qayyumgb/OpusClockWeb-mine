@@ -22,11 +22,7 @@ export class TaskComponent implements OnInit {
   tasks: Task[] = [];
 
   presence = new FormGroup({
-<<<<<<< HEAD
-    date: new FormControl<moment.Moment | null>(null),
-=======
     date: new FormControl<Date | null>(new Date()),
->>>>>>> mukhtar_branch
     startTime: new FormControl<string | null>('07:00'),
     endTime: new FormControl<string | null>('16:00'),
   });
@@ -63,17 +59,10 @@ export class TaskComponent implements OnInit {
     this.presence.controls.date.valueChanges.subscribe((value) => {
       this.setDateHint();
     });
-<<<<<<< HEAD
-  }
-
-  ngAfterViewInit() {
-    this.presence.controls.date.setValue(moment());
-=======
     this.presence.controls.date.setValue(new Date());
   }
 
   ngAfterViewInit() {
->>>>>>> mukhtar_branch
   }
 
   setDateHint() {

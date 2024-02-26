@@ -8,10 +8,7 @@ import { TaskComponent } from './time-registration/task/task.component';
 import { InputTimeComponent } from '../common/components/input-time/input-time.component';
 import { MainLayoutComponent } from './main-layout/main-layout.component';
 import { NavbarComponent } from '../common/navbar/navbar.component';
-<<<<<<< HEAD
 import {AuthService} from '../common/services/auth.service';
-=======
->>>>>>> mukhtar_branch
 
 
 @NgModule({
@@ -26,13 +23,9 @@ import {AuthService} from '../common/services/auth.service';
     CommonModule,
     MainRoutingModule,
     SharedModule
-<<<<<<< HEAD
   ],
   providers: [
     AuthService,
   ],
-=======
-  ]
->>>>>>> mukhtar_branch
 })
 export class MainModule { }

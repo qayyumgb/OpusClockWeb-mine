@@ -1,13 +1,9 @@
-<<<<<<< HEAD
 import {Component, EventEmitter, Output} from '@angular/core';
 import {UntypedFormControl, UntypedFormGroup} from '@angular/forms';
 import {Subscription} from 'rxjs';
 import {AuthService} from '../../common/services/auth.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {MatSnackBar} from '@angular/material/snack-bar';
-=======
-import { Component } from '@angular/core';
->>>>>>> mukhtar_branch
 
 @Component({
   selector: 'app-login',
@@ -15,7 +11,6 @@ import { Component } from '@angular/core';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
-<<<<<<< HEAD
   public form: UntypedFormGroup = new UntypedFormGroup({
     email: new UntypedFormControl(''),
     password: new UntypedFormControl(''),
@@ -126,7 +121,3 @@ export class LoginComponent {
   }
 }
 
-=======
-
-}
->>>>>>> mukhtar_branch
