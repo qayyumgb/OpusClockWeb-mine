@@ -66,10 +66,10 @@
                 <span>Remove all tasks</span>
               </button>
       
-              <button class="d-block d-lg-none" mat-icon-button (click)="removeTask('AUTO')" color="accent">
+              <button class="d-block d-lg-none" *ngIf="tasks.length > 0" mat-icon-button (click)="removeTask('AUTO')" color="accent">
                 <mat-icon>remove</mat-icon>
               </button>
-              <button class="d-block d-lg-none" mat-icon-button (click)="addTask('AUTO')" color="accent">
+              <button class="d-block d-lg-none" *ngIf="tasks.length > 0" mat-icon-button (click)="addTask('AUTO')" color="accent">
                 <mat-icon>add</mat-icon>
               </button>
 >>>>>>> mukhtar_branch
