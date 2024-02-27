@@ -1,6 +1,6 @@
 .login__left{
-    background-image: url('/assets/images/clockBG.jpg');
-    background-position: left;
+    background-image: url('/assets/images/opus_watch_hero_bg.jpg');
+    background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
     width: 100%;
@@ -9,7 +9,7 @@
     .left{
 
         &__overlay{
-            background: linear-gradient(-40deg, rgb(19 26 35 / 80%) 0%, rgb(27 36 41 / 48%) 40%, rgb(19 26 35 / 79%) 100%);
+             background: linear-gradient(-40deg, rgb(19 26 35 / 80%) 0%, rgb(27 36 41 / 35%) 40%, rgb(19 26 35 / 79%) 100%);
             height: 100%;
             display: flex;
         }
