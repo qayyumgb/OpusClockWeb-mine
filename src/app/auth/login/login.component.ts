@@ -27,9 +27,18 @@ export class LoginComponent {
     private snackBar: MatSnackBar
   ) {
     this.loggedInUserFromAuthServcSubConstuctor = this.authService.loggedInUserFromAuthService$.subscribe((userRecord) => {
-      if (userRecord) {
+      console.log(JSON.stringify(userRecord))
+      if (userRecord && userRecord.associatedWorkerId) {
         this.router.navigate([`time-registration`]);
-      } //TODO -- handle workerId added to user document
+      } else if(userRecord) {
+        this.snackBar.open('This user is not authorized to access Clock Web App as it is not associated with a worker', '', {
+          duration: 6000,
+          panelClass: ['snackbar-error'],
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom',
+        });
+        this.authService.signOut();
+      }
     });
   }
 
@@ -56,9 +65,18 @@ export class LoginComponent {
         this.form.value.password
       );
       this.loggedInUserFromAuthServiceSubscription = this.authService.loggedInUserFromAuthService$.subscribe((userRecord) => {
-        if (userRecord){
+        console.log(JSON.stringify(userRecord))
+        if (userRecord && userRecord.associatedWorkerId) {
           this.router.navigate([`time-registration`]);
-        } //TODO -- handle workerId added to user document
+        } else if(userRecord) {
+          this.snackBar.open('This user is not authorized to access Clock Web App as it is not associated with a worker', '', {
+            duration: 6000,
+            panelClass: ['snackbar-error'],
+            horizontalPosition: 'center',
+            verticalPosition: 'bottom',
+          });
+          this.authService.signOut();
+        }
       });
     } catch (error: any) {
       let errorMessage;

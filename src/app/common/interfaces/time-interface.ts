@@ -7,24 +7,24 @@ export interface Scheme {
     till?: string;
     tillMoment?: moment.Moment;
   }
-  
+
   export interface BreakScheme {
     startTime: string;
     scheme: Scheme[];
   }
-  
+
   export interface Worker {
     name: string;
     id: string;
   }
-  
+
   export interface TaskOption {
     id: string;
     name: string;
     type: 'break' | 'task' | '';
   }
-  
-  export interface Task {
+
+  export interface TaskRegn {
     startTime: string;
     endTime: string;
     duration: string;

@@ -1,4 +1,4 @@
-import {APP_INITIALIZER, NgModule} from '@angular/core';
+import {APP_INITIALIZER, NgModule, isDevMode} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 
 import {AppRoutingModule} from './app-routing.module';
@@ -17,6 +17,8 @@ import {MatButtonModule} from '@angular/material/button';
 import {ReactiveFormsModule} from '@angular/forms';
 import {AuthService} from './common/services/auth.service';
 import {AuthGuard} from '@angular/fire/auth-guard';
+import {HttpClientModule} from "@angular/common/http";
+import { ServiceWorkerModule } from '@angular/service-worker';
 
 
 export function initializeApp(afAuth: AngularFireAuth): () => Promise<null> {
@@ -43,8 +45,14 @@ export function initializeApp(afAuth: AngularFireAuth): () => Promise<null> {
     MatToolbarModule,
     MatMenuModule,
     MatIconModule,
-    MatButtonModule
-
+    MatButtonModule,
+    HttpClientModule,
+    ServiceWorkerModule.register('ngsw-worker.js', {
+      enabled: !isDevMode(),
+      // Register the ServiceWorker as soon as the application is stable
+      // or after 30 seconds (whichever comes first).
+      registrationStrategy: 'registerWhenStable:30000'
+    })
   ],
   providers: [
     {

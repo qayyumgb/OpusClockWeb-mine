@@ -6,6 +6,11 @@ export function time(time: string | null): moment.Moment {
   return moment(time, TIME_FORMAT);
 }
 
+export function dateIsToday(date: moment.Moment): boolean {
+  return date.isSame(new Date(), 'day');
+}
+
+
 export function timeAddDate(date: Date |null, time: string|null): Date {
   const t = moment(time, TIME_FORMAT);
   return moment(date?.toLocaleString())

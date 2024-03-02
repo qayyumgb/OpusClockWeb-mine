@@ -5,7 +5,7 @@ import firebase from 'firebase/compat/app';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
 
-import {Observable, of, Subscription} from 'rxjs';
+import {BehaviorSubject, Observable, of, Subscription} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
 
@@ -15,8 +15,10 @@ import {switchMap} from 'rxjs/operators';
 export class AuthService {
 
   loggedInUserFromAuthService$: Observable<any>;
+  loggedInClientWorkerFromAuthService$: BehaviorSubject<any> = new BehaviorSubject(null);
   isAnonymous: boolean;
   private loggedInUserFromAuthServiceSubscription: Subscription;
+  private loggedInWorkerClientFromAuthSrvcSubscription: Subscription;
   private loggedInUserDocData: any;
 
   constructor(private afAuth: AngularFireAuth,
@@ -27,7 +29,8 @@ export class AuthService {
       switchMap(user => {
         if (user) {
           this.isAnonymous = user.isAnonymous;
-          return this.afs.doc<any>(`users/${user.uid}`).valueChanges({ idField: 'id' });
+          this.fetchWorkerNClientInfo(user);
+          return this.afs.doc<any>(`users/${user.uid}`).valueChanges({idField: 'id'});
         } else {
           return of(null);
         }
@@ -35,7 +38,26 @@ export class AuthService {
     );
     this.loggedInUserFromAuthServiceSubscription = this.loggedInUserFromAuthService$.subscribe(userDocData => {
       this.loggedInUserDocData = userDocData;
+      this.afs.doc(`clients/${userDocData.associatedWorkerClientId}`).get().subscribe(clientDS => {
+        let clientDocData: any = clientDS.data();
+        this.afs.doc(`clients/${userDocData.associatedWorkerClientId}/workers/${userDocData.associatedWorkerId}`).get().subscribe(workerDS => {
+          let workerDocData: any = workerDS.data();
+          this.loggedInClientWorkerFromAuthService$.next({
+            client: {
+              ...clientDocData,
+              id: userDocData.associatedWorkerClientId
+            },
+            worker: {
+              ...workerDocData,
+              id: userDocData.associatedWorkerId
+            }
+          });
+        });
+      });
     });
+  }
+
+  fetchWorkerNClientInfo(user: any) {
   }
 
   // Users can have 3 roles - admin(type=client), manager(type=client), developer(type=developer)

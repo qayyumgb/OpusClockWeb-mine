@@ -15,6 +15,7 @@ export const breakScheme: BreakScheme = {
   ],
 };
 
+/*
 export const tasksOptions: TaskOption[] = [
   { id: 'abc10', name: 'Pauze', type: 'break' },
   { id: 'abc11', name: 'Financien', type: 'task' },
@@ -23,3 +24,4 @@ export const tasksOptions: TaskOption[] = [
   { id: 'abc14', name: 'Overleg', type: 'task' },
   { id: 'abc15', name: 'Algemeen', type: 'task' },
 ];
+*/

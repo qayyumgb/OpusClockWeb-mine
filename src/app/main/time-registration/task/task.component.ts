@@ -1,25 +1,30 @@
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { Component, Inject, OnInit } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
-import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
-import { MatDialog } from '@angular/material/dialog';
+import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
+import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
+import {FormControl, FormGroup} from '@angular/forms';
+import {DateAdapter, MAT_DATE_LOCALE} from '@angular/material/core';
+import {MatDialog} from '@angular/material/dialog';
 import * as moment from 'moment';
-import { breakScheme, tasksOptions, workerOptions } from 'src/app/common/helpers/data';
-import { TIME_FORMAT, time, timeAddDate, timeAsSeconds } from 'src/app/common/helpers/time';
-import { BreakScheme, Task } from 'src/app/common/interfaces/time-interface';
+import {breakScheme, workerOptions} from 'src/app/common/helpers/data';
+import {TIME_FORMAT, time, timeAddDate, timeAsSeconds, dateIsToday} from 'src/app/common/helpers/time';
+import {BreakScheme, TaskRegn} from 'src/app/common/interfaces/time-interface';
+import {Subscription} from 'rxjs';
+import {AuthService} from '../../../common/services/auth.service';
+import {FirestoreService} from '../../../common/services/firestore.service';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-task',
   templateUrl: './task.component.html',
   styleUrls: ['./task.component.scss']
 })
-export class TaskComponent implements OnInit {
+export class TaskComponent implements OnInit, OnDestroy {
+  dateToday: Date = new Date();
   workerSelected = workerOptions[0];
   workerOptions = workerOptions;
 
   breakSchemeSelected: BreakScheme;
 
-  tasks: Task[] = [];
+  taskRegns: TaskRegn[] = [];
 
   presence = new FormGroup({
     date: new FormControl<Date | null>(new Date()),
@@ -40,11 +45,20 @@ export class TaskComponent implements OnInit {
   pauseCount: number = 0;
   lastSelectedTask: number = 0;
   saveDisabled: boolean = true;
+  loggedInUserFromAuthServiceSubscription: Subscription;
+  loggedInUserDocData: any;
+  presenceDocForToday: any;
+  allTasksSubscription: Subscription;
+  allTasksList: any[];
+  presenceDocSubscription: Subscription;
 
   constructor(
     public dialog: MatDialog,
     private _adapter: DateAdapter<any>,
-    @Inject(MAT_DATE_LOCALE) private _locale: string
+    @Inject(MAT_DATE_LOCALE) private _locale: string,
+    private authService: AuthService,
+    private firestoreService: FirestoreService,
+    private snackBar: MatSnackBar
   ) {
     this.breakSchemeSelector();
     this.presenceTotalTime = time(this.presence.controls['endTime'].value)
@@ -53,6 +67,33 @@ export class TaskComponent implements OnInit {
     this.updateTasksFromTo();
     this._locale = 'nl';
     this._adapter.setLocale(this._locale);
+    this.loggedInUserFromAuthServiceSubscription = this.authService.loggedInUserFromAuthService$.subscribe(
+      (userDocData: any) => {
+        this.loggedInUserDocData = userDocData;
+        this.loadTasks();
+        this.presenceDocSubscription = this.firestoreService.getPresenceDocForToday(userDocData.associatedWorkerId, userDocData.associatedWorkerClientId)
+          .subscribe(async (presenceDocs) => {
+            console.log(JSON.stringify(presenceDocs));
+            if (presenceDocs.length > 0) {
+              this.presenceDocForToday = presenceDocs[0];
+            } else {
+              await this.firestoreService.createPresenceDocForToday(this.loggedInUserDocData);
+            }
+          });
+      });
+  }
+
+  loadTasks() {
+    this.allTasksSubscription = this.firestoreService.getTasksForClockWeb(this.loggedInUserDocData.associatedWorkerClientId)
+      .subscribe(tasks => {
+        this.allTasksList = tasks;
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.loggedInUserFromAuthServiceSubscription?.unsubscribe();
+    this.presenceDocSubscription?.unsubscribe();
+    this.allTasksSubscription?.unsubscribe();
   }
 
   ngOnInit() {
@@ -71,9 +112,13 @@ export class TaskComponent implements OnInit {
     );
   }
 
+  futureFilter = (d: Date | null): boolean => {
+    return d ? d <= this.dateToday : true;
+  };
+
   tasksFilter(e: any, i: number): void {
     const filterValue = e.target.value.toLowerCase();
-    this.tasks[i].filteredOptions = tasksOptions.filter((o) =>
+    this.taskRegns[i].filteredOptions = this.allTasksList.filter((o) =>
       o.name.toLowerCase().includes(filterValue)
     );
     this.updateTasksFromTo();
@@ -148,10 +193,10 @@ export class TaskComponent implements OnInit {
         )
           break;
         // Task
-        this.tasks.push({
+        this.taskRegns.push({
           startTime: lastFrom ? lastFrom : '',
           endTime: '',
-          selectedOption: { id: '', name: '', type: '' },
+          selectedOption: {id: '', name: '', type: ''},
           duration: durationTaskMinimum,
         });
 
@@ -178,21 +223,21 @@ export class TaskComponent implements OnInit {
         )
           break;
         // Pause
-        this.tasks.push({
+        this.taskRegns.push({
           duration: durationBreakMinimum,
           endTime: '',
           startTime: '',
-          selectedOption: tasksOptions[0],
+          selectedOption: this.allTasksList[0], //TODO -- check this logic
         });
         lastFrom = nextBreak.till ? nextBreak.till : '';
       } else {
         const remaining = time(this.presence.controls['endTime'].value)
           .subtract(moment.duration(lastFrom))
           .format(TIME_FORMAT);
-        this.tasks.push({
+        this.taskRegns.push({
           startTime: '',
           endTime: '',
-          selectedOption: { id: '', name: '', type: '' },
+          selectedOption: {id: '', name: '', type: ''},
           duration: remaining,
         });
         proceed = false;
@@ -208,14 +253,14 @@ export class TaskComponent implements OnInit {
   }
 
   dropTask(event: CdkDragDrop<string[]>) {
-    moveItemInArray(this.tasks, event.previousIndex, event.currentIndex);
+    moveItemInArray(this.taskRegns, event.previousIndex, event.currentIndex);
     this.updateTasksFromTo();
   }
 
   setLastSelectedTask(i: number) {
     this.lastSelectedTask = i;
-    this.tasks.map((task) => (task.class = ''));
-    this.tasks[i].class = 'task-card-selected';
+    this.taskRegns.map((task) => (task.class = ''));
+    this.taskRegns[i].class = 'task-card-selected';
     console.log(i);
   }
 
@@ -226,13 +271,13 @@ export class TaskComponent implements OnInit {
       .format(TIME_FORMAT);
 
     if (i !== 'AUTO') {
-      this.tasks.splice(Number(i) + 1, 0, {
+      this.taskRegns.splice(Number(i) + 1, 0, {
         startTime: '',
         endTime: '',
         duration: remainingMinusPause,
       });
     } else {
-      this.tasks.splice(this.lastSelectedTask + 1, 0, {
+      this.taskRegns.splice(this.lastSelectedTask + 1, 0, {
         startTime: '',
         endTime: '',
         duration: remainingMinusPause,
@@ -243,10 +288,10 @@ export class TaskComponent implements OnInit {
 
   addRemainingAsPause() {
     this.updateTasksFromTo();
-    this.tasks.push({
-      startTime: this.tasks[this.tasks.length - 1].startTime,
+    this.taskRegns.push({
+      startTime: this.taskRegns[this.taskRegns.length - 1].startTime,
       endTime: '',
-      selectedOption: tasksOptions[0],
+      selectedOption: this.allTasksList[0],//TODO -- check this logic
       duration: this.totalTimeBreak,
     });
     this.updateTasksFromTo();
@@ -254,20 +299,20 @@ export class TaskComponent implements OnInit {
 
   removeTask(i: number | 'AUTO') {
     if (i !== 'AUTO') {
-      this.tasks.splice(Number(i), 1);
+      this.taskRegns.splice(Number(i), 1);
     } else {
-      this.tasks.splice(this.lastSelectedTask, 1);
+      this.taskRegns.splice(this.lastSelectedTask, 1);
     }
     this.updateTasksFromTo();
   }
 
   clearTasks() {
-    this.tasks = [];
+    this.taskRegns = [];
     this.updateTasksFromTo();
   }
 
   changedTaskDuration(e: any) {
-    console.log(this.tasks);
+    console.log(this.taskRegns);
     this.updateTasksFromTo();
   }
 
@@ -288,7 +333,7 @@ export class TaskComponent implements OnInit {
     this.totalTimeTasksSpecified = '00:00';
     this.pauseCount = 0;
 
-    this.tasks.map((task) => {
+    this.taskRegns.map((task) => {
       const duration = task.duration;
       this.totalTimeSpecified = time(this.totalTimeSpecified)
         .add(moment.duration(duration))
@@ -317,10 +362,10 @@ export class TaskComponent implements OnInit {
       time(this.presenceTotalTime).format('X') >=
       time(this.totalTimeSpecified).format('X')
         ? time(this.presenceTotalTime)
-            .subtract(moment.duration(this.totalTimeSpecified))
-            .format(TIME_FORMAT)
+          .subtract(moment.duration(this.totalTimeSpecified))
+          .format(TIME_FORMAT)
         : 'over due';
-    const emptyTasks = this.tasks.filter(
+    const emptyTasks = this.taskRegns.filter(
       (task) => task.selectedOption?.name === undefined
     ).length;
     this.saveDisabled = this.totalTimeRemaining !== '00:00' || emptyTasks > 0;
@@ -362,7 +407,7 @@ export class TaskComponent implements OnInit {
     };
 
     // FS Location: client/{clientId}/presence/{presenceId}/tasks/{tasksId}
-    const tasks = this.tasks.map((task) => ({
+    const tasks = this.taskRegns.map((task) => ({
       task: task.selectedOption?.name,
       taskId: task.selectedOption?.id,
       userName,
@@ -387,7 +432,27 @@ export class TaskComponent implements OnInit {
       updatedTimestamp: new Date(),
     }));
 
-    console.log(JSON.stringify({ presence, tasks }));
+    console.log(JSON.stringify({presence, tasks}));
     console.log('Tasks are saved to Firestore');
+  }
+
+  async cancelTasks() {
+    try {
+      await this.firestoreService.deleteAllTaskRegnsNPresence(this.taskRegns, this.presenceDocForToday);
+      this.taskRegns = [];
+      this.snackBar.open('Data for today has been cleared', '', {
+        duration: 5000,
+        panelClass: ['snackbar-success'],
+        horizontalPosition: 'center',
+        verticalPosition: 'bottom',
+      });
+    } catch (error: any) {
+      //TODO -- show error snackbar
+    }
+  }
+
+  isCancellable() {
+    return true;
+    //TODO -- dateIsToday(this.dateToday)
   }
 }
