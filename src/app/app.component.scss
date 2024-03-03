@@ -12,3 +12,58 @@
         overflow: auto;
     }
 }
+
+.install-desktop {
+
+    .pwa-content {
+        padding: 0.5rem;
+        color: #ffffff;
+
+        .arrow-icon {
+            position: absolute;
+            top: 8px;
+            left: -62px;
+            transform: rotate(4deg);
+            width: 50px;
+        }
+
+        .close_btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            padding: 0.25rem;
+            cursor: pointer;
+            border-radius: 20px;
+            font-size: 1.25rem;
+
+            &:hover {
+                background-color: #383f42;
+            }
+        }
+
+        ._icon {
+            font-size: 2rem;
+        }
+    }
+}
+
+::ng-deep .app-install-desktop{
+
+    .mdc-snackbar__surface{
+        background-color: #1b2429 !important;
+        border-radius: 20px !important;
+        border: 1px solid #00F8A2;
+        width: 410px;
+    }
+
+    .remind-me-btn {
+        label {
+            margin-bottom: 0;
+        }
+    }
+}
+
+.primary-color {
+    color: #00F8A2;
+}
+
