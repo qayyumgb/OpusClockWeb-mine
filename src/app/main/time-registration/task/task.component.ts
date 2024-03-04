@@ -18,6 +18,19 @@ import {MatSnackBar} from '@angular/material/snack-bar';
   styleUrls: ['./task.component.scss']
 })
 export class TaskComponent implements OnInit, OnDestroy {
+
+  states: string[] = [
+    'Alabama',
+    'Alaska',
+    'Arizona',
+    'Arkansas',
+    'California',
+    'Colorado',
+    'Connecticut',
+  ];
+
+
+
   dateToday: Date = new Date();
   workerSelected = workerOptions[0];
   workerOptions = workerOptions;

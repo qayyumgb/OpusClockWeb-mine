@@ -192,10 +192,17 @@
 // }
 
 
-.time-inputs{
+.time-inputs, .date-location{
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
+}
+
+.date-location{
+
+    &>div{
+        width: 290px;
+    }
 }
 
 .time-registration__content{

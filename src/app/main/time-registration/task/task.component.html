@@ -5,14 +5,28 @@
             <mat-card-content>
                 <div [formGroup]="presence" class="max-w-600">
                     <div class="mb-3">
-                        <label class="d-block mb-3 font-xs-18">Set date</label>
-                        <mat-form-field class="date-field w-100" appearance="outline">
-                            <mat-label>Choose a date</mat-label>
-                            <input matInput [matDatepickerFilter]="futureFilter" [matDatepicker]="picker" formControlName="date" />
-                            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-                            <mat-datepicker #picker></mat-datepicker>
-                            <mat-hint>{{dateHint}}</mat-hint>
-                        </mat-form-field>
+                        <div class="date-location">
+                            <div class="flex-grow-1">
+                                <label class="d-block mb-3 font-xs-18">Set date</label>
+                                <mat-form-field class="date-field w-100" appearance="outline">
+                                    <mat-label>Choose a date</mat-label>
+                                    <input matInput [matDatepickerFilter]="futureFilter" [matDatepicker]="picker" formControlName="date" />
+                                    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                                    <mat-datepicker #picker></mat-datepicker>
+                                    <mat-hint>{{dateHint}}</mat-hint>
+                                </mat-form-field>
+                            </div>
+                            <div class="flex-grow-1">
+                                <label class="d-block mb-3 font-xs-18">Set location</label>
+                                <mat-form-field class="w-100" appearance="outline">
+                                    <mat-label>Choose location</mat-label>
+                                    <mat-select>
+                                      <mat-option>None</mat-option>
+                                      <mat-option *ngFor="let state of states" [value]="state">{{state}}</mat-option>
+                                    </mat-select>
+                                  </mat-form-field>
+                            </div>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="d-block mb-3 font-xs-18">Set time</label>
