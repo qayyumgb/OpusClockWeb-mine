@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, forwardRef } from '@angular/core';
+import {Component, Input, OnInit, forwardRef, SimpleChanges, Output, EventEmitter} from '@angular/core';
 import { ControlValueAccessor, FormControl, FormGroup, NG_VALUE_ACCESSOR } from '@angular/forms';
 import * as moment from 'moment';
 
@@ -17,6 +17,7 @@ import * as moment from 'moment';
 export class InputTimeComponent implements ControlValueAccessor, OnInit {
   @Input() label: string = 'label';
   @Input() hint: string = '';
+  @Output() updatedTime: EventEmitter<string> = new EventEmitter();
 
   timeValue: string = '';
   timeValueBefore: string = '';
@@ -76,6 +77,11 @@ export class InputTimeComponent implements ControlValueAccessor, OnInit {
     this.notifyValueChange();
   }
 
+  ngOnChanges(changes: SimpleChanges) {
+    //console.log('changes');
+  }
+
+ 
   onChange: ((value: string) => {});
   onTouched: (() => {});
 
@@ -83,6 +89,7 @@ export class InputTimeComponent implements ControlValueAccessor, OnInit {
     if (this.onChange) {
       // console.log('notifyValueChange');
       this.onChange(this.timeValue);
+      this.updatedTime.emit(this.timeValue)
     }
   }
 
@@ -116,6 +123,7 @@ export class InputTimeComponent implements ControlValueAccessor, OnInit {
         .add(value, 'hours')
         .format('HH')
     );
+    this.value = this.timeValue;
   }
 
   addMinutes(value: number) {
@@ -124,5 +132,6 @@ export class InputTimeComponent implements ControlValueAccessor, OnInit {
         .add(value, 'minutes')
         .format('mm')
     );
+    this.value = this.timeValue;
   }
 }

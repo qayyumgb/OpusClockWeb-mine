@@ -18,13 +18,19 @@ export interface Scheme {
     id: string;
   }
 
+  export interface LocationOption {
+    id: string;
+    name: string;
+    filteredOptions?:any
+  }
   export interface TaskOption {
     id: string;
     name: string;
-    type: 'break' | 'task' | '';
+    type: 'BREAK' | 'TASK' | '';
   }
 
   export interface TaskRegn {
+    id?: string;
     startTime: string;
     endTime: string;
     duration: string;

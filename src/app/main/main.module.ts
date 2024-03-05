@@ -10,6 +10,7 @@ import { MainLayoutComponent } from './main-layout/main-layout.component';
 import { NavbarComponent } from '../common/navbar/navbar.component';
 import {AuthService} from '../common/services/auth.service';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatTooltipModule} from '@angular/material/tooltip';
 
 
 @NgModule({
@@ -24,7 +25,8 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
     CommonModule,
     MainRoutingModule,
     SharedModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatTooltipModule
   ],
   providers: [
     AuthService,

@@ -1,4 +1,3 @@
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import {APP_INITIALIZER, NgModule, isDevMode} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 
@@ -15,14 +14,11 @@ import {MatMenuModule} from '@angular/material/menu';
 import {MatIconModule} from '@angular/material/icon';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MatButtonModule} from '@angular/material/button';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {ReactiveFormsModule} from '@angular/forms';
 import {AuthService} from './common/services/auth.service';
 import {AuthGuard} from '@angular/fire/auth-guard';
 import {HttpClientModule} from "@angular/common/http";
 import { ServiceWorkerModule } from '@angular/service-worker';
-import { MatCardModule } from '@angular/material/card';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-
 
 
 export function initializeApp(afAuth: AngularFireAuth): () => Promise<null> {
@@ -56,11 +52,7 @@ export function initializeApp(afAuth: AngularFireAuth): () => Promise<null> {
       // Register the ServiceWorker as soon as the application is stable
       // or after 30 seconds (whichever comes first).
       registrationStrategy: 'registerWhenStable:30000'
-    }),
-    MatCardModule,
-    FormsModule,
-    MatCheckboxModule,
-    MatSnackBarModule
+    })
   ],
   providers: [
     {

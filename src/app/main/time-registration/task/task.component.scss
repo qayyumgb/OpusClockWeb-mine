@@ -1,202 +1,11 @@
-// /* .example-form {
-//   min-width: 150px;
-//   max-width: 500px;
-//   width: 100%;
-//   margin-top: 16px;
-// }
-
-// .example-full-width {
-//   width: 100%;
-// } */
-
-// .container {
-//     margin: 10px;
-// }
-
-// .toolbar-nav {
-//     display: none;
-// }
-
-// .worker-container {
-//     display: flex;
-//     flex-direction: row;
-//     justify-content: flex-start;
-// }
-
-// .worker {
-//     max-width: 200px;
-//     background-color: white !important;
-//     border-bottom: none !important;
-// }
-
-// .task-container {
-//     display: flex;
-//     flex-direction: row;
-//     justify-content: flex-start;
-//     align-items: baseline;
-// }
-
-// .presence-container {
-//     display: flex;
-//     flex-direction: row;
-//     justify-content: stretch;
-//     align-items: baseline;
-// }
-
-// .presence-container>mat-form-field,
-// input-time-component {
-//     flex-grow: 1;
-// }
-
-// .date-field {
-//     min-width: min-content;
-// }
-
-// .timer-icon {
-//     color: #707070;
-// }
-
-// .spacer {
-//     flex: 1 1 auto;
-// }
-
-// .duration {
-//     flex-grow: 0;
-//     min-width: 120px;
-//     max-width: 120px;
-// }
-
-// .task-card {
-//     margin: 2px;
-// }
-
-// .task {
-//     flex-grow: 1;
-// }
-
-// .info-icon {
-//     color: gray;
-// }
-
-// .drag-handle {
-//     color: lightgray;
-//     font-size: 1.6em;
-//     margin-right: 0.5em;
-// }
-
-// .cdk-drag-preview {
-//     box-sizing: border-box;
-//     border-radius: 4px;
-//     box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
-//         0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
-// }
-
-// .cdk-drag-placeholder {
-//     opacity: 0;
-// }
-
-// .cdk-drag-animating {
-//     transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-// }
-
-// .example-box:last-child {
-//     border: none;
-// }
-
-// .example-list.cdk-drop-list-dragging .example-box:not(.cdk-drag-placeholder) {
-//     transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-// }
-
-// .presence-container>mat-form-field {
-//     width: auto;
-// }
-
-// .task-header {
-//     display: flex;
-//     flex-direction: row;
-// }
-
-// .task-header>h5 {
-//     flex-grow: 1;
-// }
-
-// .presence-button-header {
-//     display: none;
-// }
-
-// .remaining-container {
-//     text-align: left;
-// }
-
-// @media only screen and (max-width: 992px) {
-//     .container {
-//         margin-bottom: 60px;
-//     }
-
-//     .toolbar-nav {
-//         display: flex;
-//         position: fixed;
-//         bottom: 0;
-//         z-index: 1000;
-//         justify-content: space-around;
-//     }
-
-//     .toolbar-nav>button {
-//         margin: 10px;
-//     }
-
-//     .toolbar-remaining-container {
-//         max-height: 50px;
-//     }
-
-//     .toolbar-remaining-container>p {
-//         line-height: 1.5em;
-//         font-size: 0.7em;
-//         font-weight: 400;
-//         margin: 0px;
-//         padding: 0px;
-//     }
-
-//     // .action-buttons {
-//     //   display: none;
-//     // }
-
-//     .task-container {
-//         flex-direction: row;
-//     }
-
-//     .presence-container {
-//         flex-direction: column;
-//     }
-
-//     .presence-container>mat-form-field,
-//     input-time-component {
-//         width: 100%;
-//     }
-
-//     .presence-button {
-//         display: none;
-//     }
-
-//     .presence-button-header {
-//         display: block;
-//     }
-
-//     .drag-handle {
-//         font-size: 1em;
-//     }
-
-//     mat-hint {
-//         font-size: 1em;
-//     }
-// }
 
 
-.time-inputs, .date-location{
+.time-inputs,.date-location{
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
 }
+
 
 .date-location{
 
@@ -204,7 +13,6 @@
         width: 290px;
     }
 }
-
 .time-registration__content{
 
     & > label{
@@ -246,7 +54,7 @@
     }
 }
 
-.task-card-selected{
+.task-regn-card-selected{
     border-color:#00F8A2 !important;
 }
 

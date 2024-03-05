@@ -1,6 +1,6 @@
 <mat-form-field [matMenuTriggerFor]="menu" (menuOpened)="setValuesOnInput()" class="till" appearance="outline">
     <mat-label>{{label}}</mat-label>
-    <input matInput type="time" [(ngModel)]="timeValue" (click)="$event.stopPropagation();" class="input" />
+    <input matInput type="time" [(ngModel)]="timeValue" (click)="$event.stopPropagation();" (ngModelChange)="onChange($event)" class="input" />
     <button matSuffix mat-icon-button>
         <!-- (click)="openTimeEditDialog($event)" -->
         <mat-icon class="material-symbols-outlined timer-icon">schedule</mat-icon>

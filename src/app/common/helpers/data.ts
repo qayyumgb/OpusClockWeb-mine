@@ -1,10 +1,10 @@
 import { BreakScheme, TaskOption, Worker } from "../interfaces/time-interface";
 
-export const workerOptions: Worker[] = [
+/*export const workerOptions: Worker[] = [
   { name: 'Bart', id: 'd7f4a8d4-cf67-424d-b698-f475785810b4' },
   { name: 'John', id: '2425bc63-4be8-4143-beef-4f471b6bf2d9' },
   { name: 'Rose', id: '36cafb11-7c55-45a5-8cf5-d96f75d630c1' },
-];
+];*/
 
 export const breakScheme: BreakScheme = {
   startTime: '07:00',
