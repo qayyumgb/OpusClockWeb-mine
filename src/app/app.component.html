@@ -6,3 +6,25 @@
 </div>
 
 
+<!-- Install desktop -->
+<ng-container *ngIf="!isAppInstalled">
+    <ng-template #installDesktopApp>
+        <div class="install-desktop">
+            <div class="pwa-content">
+                <!-- <img class="arrow-icon" src="/assets/images/curved-arrow-1.png" width="100"> -->
+                <span (click)="closeInstallDesktopDialog()" class="close_btn material-symbols-outlined">close</span>
+                <span class="_icon material-symbols-outlined mb-2">install_desktop</span>
+                <div>
+                    <h4 class="primary-color mb-1">Download for desktop</h4>
+                    <p class="mb-2">Click on the install icon button in the searchbar to download the application.</p>
+                </div>
+                <div>
+                    <mat-checkbox class="remind-me-btn" [(ngModel)]="checked" (click)="remindMeLater()">Remind me later</mat-checkbox>
+                </div>
+                <div class="text-right">
+                    <button mat-flat-button (click)="installDesktop()" class="cstm-primary" color="primary">Install on Desktop</button>
+                </div>
+            </div>
+        </div>
+    </ng-template>
+</ng-container>
