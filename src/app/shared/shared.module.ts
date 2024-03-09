@@ -1,4 +1,5 @@
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA, APP_INITIALIZER } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatCardModule} from '@angular/material/card';
@@ -15,12 +16,15 @@ import {MatDialogModule} from '@angular/material/dialog';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatInputModule } from '@angular/material/input';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 
 
 const MODULES = [
   ReactiveFormsModule,
   MatToolbarModule,
+  CommonModule,
   MatCardModule,
   MatFormFieldModule,
   MatSelectModule,
@@ -34,7 +38,10 @@ const MODULES = [
   MatAutocompleteModule,
   MatDialogModule,
   MatInputModule,
-  DragDropModule
+  DragDropModule,
+  MatCheckboxModule,
+  MatSnackBarModule,
+  MatTooltipModule
   
 ]
 
@@ -42,12 +49,12 @@ const MODULES = [
   declarations: [],
 
   providers: [  
-    MatDatepickerModule,  
+    MatDatepickerModule,
   ],
 
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ],
   
-  imports: [...MODULES, CommonModule],
+  imports: [...MODULES],
   exports: [...MODULES],
 })
 export class SharedModule { }
