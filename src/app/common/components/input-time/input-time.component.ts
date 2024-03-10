@@ -16,6 +16,7 @@ import * as moment from 'moment';
 })
 export class InputTimeComponent implements ControlValueAccessor, OnInit {
   @Input() label: string = 'label';
+  @Input() isDisabled: boolean = false;
   @Input() hint: string = '';
   @Output() updatedTime: EventEmitter<string> = new EventEmitter();
 

@@ -14,14 +14,11 @@ import {MatMenuModule} from '@angular/material/menu';
 import {MatIconModule} from '@angular/material/icon';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MatButtonModule} from '@angular/material/button';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {ReactiveFormsModule} from '@angular/forms';
 import {AuthService} from './common/services/auth.service';
 import {AuthGuard} from '@angular/fire/auth-guard';
 import {HttpClientModule} from "@angular/common/http";
 import { ServiceWorkerModule } from '@angular/service-worker';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
-import {MatCheckboxModule} from '@angular/material/checkbox';
-import { MatCardModule } from '@angular/material/card';
 
 
 export function initializeApp(afAuth: AngularFireAuth): () => Promise<null> {
@@ -50,10 +47,6 @@ export function initializeApp(afAuth: AngularFireAuth): () => Promise<null> {
     MatIconModule,
     MatButtonModule,
     HttpClientModule,
-    MatCardModule,
-    FormsModule,
-    MatCheckboxModule,
-    MatSnackBarModule,
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: !isDevMode(),
       // Register the ServiceWorker as soon as the application is stable

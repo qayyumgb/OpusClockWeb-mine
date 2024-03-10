@@ -2,6 +2,12 @@
   "hosting": {
     "site": "opus-clock-webapp-dev",
     "public": "dist/opus-clock-web",
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ],
     "ignore": [
       "firebase.json",
       "**/.*",

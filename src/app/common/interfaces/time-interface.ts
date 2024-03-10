@@ -37,4 +37,5 @@ export interface Scheme {
     class?: string;
     selectedOption?: TaskOption;
     filteredOptions?: TaskOption[];
+    uuid?: string
   }

@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { DataSharingService } from './services/data-sharing.service';
+import { DataSharingService } from './common/services/data-sharing.service';
 
 @Component({
   selector: 'app-root',
@@ -8,7 +8,6 @@ import { DataSharingService } from './services/data-sharing.service';
 })
 export class AppComponent {
 
-  @ViewChild('installDesktopApp') installDesktopApp : any;
   title = 'opus-clock-web';
   checked = false;
   currentPath: string;

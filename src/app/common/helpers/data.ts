@@ -6,6 +6,7 @@ import { BreakScheme, TaskOption, Worker } from "../interfaces/time-interface";
   { name: 'Rose', id: '36cafb11-7c55-45a5-8cf5-d96f75d630c1' },
 ];*/
 
+/*
 export const breakScheme: BreakScheme = {
   startTime: '07:00',
   scheme: [
@@ -14,6 +15,7 @@ export const breakScheme: BreakScheme = {
     { from: '15:00', duration: '00:15' },
   ],
 };
+*/
 
 /*
 export const tasksOptions: TaskOption[] = [

@@ -1,6 +1,7 @@
 import * as moment from "moment";
 
 export const TIME_FORMAT = 'HH:mm';
+export const TIME_ZONE = 'Europe/Amsterdam';
 
 export function time(time: string | null): moment.Moment {
   return moment(time, TIME_FORMAT);
@@ -14,7 +15,7 @@ export function dateIsToday(date: moment.Moment): boolean {
 export function timeAddDate(date: Date |null, time: string|null): Date {
   const t = moment(time, TIME_FORMAT);
   return moment(date?.toLocaleString())
-    .zone(0)
+    .tz(TIME_ZONE)
     .hours(t.hours())
     .minutes(t.minutes())
     .seconds(0)

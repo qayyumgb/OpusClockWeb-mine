@@ -1,16 +1,16 @@
 import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
-import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
 import {DateAdapter, MAT_DATE_LOCALE} from '@angular/material/core';
 import {MatDialog} from '@angular/material/dialog';
 import * as moment from 'moment';
-import {breakScheme} from 'src/app/common/helpers/data';
-import {TIME_FORMAT, time, timeAddDate, timeAsSeconds, dateIsToday} from 'src/app/common/helpers/time';
-import {BreakScheme, TaskOption,LocationOption, TaskRegn} from 'src/app/common/interfaces/time-interface';
+import {TIME_FORMAT, time, timeAddDate, timeAsSeconds, dateIsToday, TIME_ZONE} from 'src/app/common/helpers/time';
+import {BreakScheme, TaskOption, LocationOption, TaskRegn} from 'src/app/common/interfaces/time-interface';
 import {Subscription} from 'rxjs';
 import {AuthService} from '../../../common/services/auth.service';
 import {FirestoreService} from '../../../common/services/firestore.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {v4 as uuidv4} from 'uuid';
 import momentDurationFormatSetup from "moment-duration-format";
 
 momentDurationFormatSetup(moment);
@@ -26,21 +26,17 @@ export class TaskComponent implements OnInit, OnDestroy {
   breakSchemeSelected: BreakScheme;
 
   taskRegns: TaskRegn[] = [];
-  workerLocation:LocationOption[] = [
-    {'id':'00-111-111','name':'new york, united state'},
-    {'id':'00-111-222','name':'albama, united state'},
-    {'id':'00-111-333','name':'Amsterdam, Netherland'}
-  ]
+
+  clientLocations: LocationOption[] = [];
+
   presenceForm = new FormGroup({
     date: new FormControl<Date | null>(new Date()),
-    location: new FormControl<string | null>(''),
-    startTime: new FormControl<string | null>('07:00'),
-    endTime: new FormControl<string | null>('16:00'),
+    locationId: new FormControl<string | null>(null),
+    startTime: new FormControl<string | null>(null),
+    endTime: new FormControl<string | null>(null),
   });
 
   dateHint: string;
-  presenceStartTimeBefore = '07:00';
-  presenceEndTimeBefore = '16:01';
   presenceTotalTime = '00:00';
   totalTimeBreaksSpecified = '00:00';
   totalTimeTasksSpecified = '00:00';
@@ -62,7 +58,14 @@ export class TaskComponent implements OnInit, OnDestroy {
   updateInProgress = false;
   tasksStateChangesSubscription: Subscription;
   dateSelected: Date | null;
-  filteredLocationOptions: LocationOption[]=[];
+  filteredLocationOptions: LocationOption[] = [];
+  locationListSubscription: Subscription;
+  worker: any;
+  workerSubscription: Subscription;
+  taskFilterOption: any = []
+  client: any;
+  clientSubscription: Subscription;
+
   constructor(
     public dialog: MatDialog,
     private _adapter: DateAdapter<any>,
@@ -71,7 +74,6 @@ export class TaskComponent implements OnInit, OnDestroy {
     private firestoreService: FirestoreService,
     private snackBar: MatSnackBar
   ) {
-    this.breakSchemeSelector();
     this.presenceTotalTime = time(this.presenceForm.controls['endTime'].value)
       .subtract(this.presenceForm.controls['startTime'].value)
       .format(TIME_FORMAT);
@@ -84,16 +86,34 @@ export class TaskComponent implements OnInit, OnDestroy {
         this.loadTasks();
         this.dateSelected = this.dateToday;
         this.setDateHint();
-        this.fetchPresenceNTaskRegns();
+
+        this.clientSubscription = this.firestoreService.getClientById(this.loggedInUserDocData.associatedWorkerClientId)
+          .subscribe((clientDS: any) => {
+            this.client = clientDS.data();
+            this.breakSchemeSelector();
+          });
+
+
+        this.workerSubscription = this.firestoreService.getWorkerByIdForClientId(this.loggedInUserDocData.associatedWorkerId, this.loggedInUserDocData.associatedWorkerClientId)
+          .subscribe((workerDS: any) => {
+            this.worker = workerDS.data();
+            this.fetchPresenceNTaskRegns();
+            this.locationListSubscription = this.firestoreService
+              .getAllLocationsForClientId(this.loggedInUserDocData.associatedWorkerClientId)
+              .subscribe((locationsList) => (this.clientLocations = locationsList
+                .filter((loc: any) => this.worker.locationIds?.includes(loc.id))
+                .sort((locA: any, locB: any) => {
+                  return locA.name?.toLowerCase() < locB.name?.toLowerCase() ? -1 : locA.name?.toLowerCase() > locB.name?.toLowerCase() ? 1 : 0;
+                })));
+          });
       });
 
-      this.filteredLocationOptions = this.workerLocation.slice();
   }
 
-  filterLocation(event:any): void {
-    console.log('eventtt',event.target.value)
+  filterLocation(event: any): void {
+    //console.log('event', event.target.value)
     const filterValue = event.target.value.toLowerCase();
-    this.filteredLocationOptions = this.workerLocation.filter(o => o.name.toLowerCase().includes(filterValue));
+    this.filteredLocationOptions = this.clientLocations.filter(o => o.name.toLowerCase().includes(filterValue));
   }
   firstLoadOfTaskRegns(taskRegns: any) {
     //console.log('No of tasks:' + taskRegns?.length);
@@ -127,6 +147,7 @@ export class TaskComponent implements OnInit, OnDestroy {
     this.allTasksSubscription = this.firestoreService.getTasksForClockWeb(this.loggedInUserDocData.associatedWorkerClientId)
       .subscribe(tasks => {
         this.allTasksList = tasks;
+        this.taskFilterOption = this.allTasksList.slice()
       });
   }
 
@@ -136,7 +157,10 @@ export class TaskComponent implements OnInit, OnDestroy {
     this.allTasksSubscription?.unsubscribe();
     this.taskRegnsSubscription?.unsubscribe();
     this.tasksStateChangesSubscription?.unsubscribe();
+    this.workerSubscription.unsubscribe();
+    this.clientSubscription.unsubscribe();
   }
+
   ngOnInit() {
     this.presenceForm.controls.date.valueChanges.subscribe((dateSelected) => {
       this.dateSelected = dateSelected;
@@ -152,12 +176,33 @@ export class TaskComponent implements OnInit, OnDestroy {
       }
     });
 
+    this.presenceForm.controls.locationId.valueChanges.subscribe(async (newLocationId) => {
+      //console.log('newLocationId:' + newLocationId);
+      //console.log('Existing locationId in presence doc:' + this.presenceDocForSelectedDate.locationId);
+      if (this.presenceDocForSelectedDate.locationId === newLocationId) {
+        //console.log('returning without setting locationId');
+        return;
+      }
+      let selectedLocation = null;
+      if (newLocationId) {
+        selectedLocation = this.clientLocations.find(loc => loc.id === newLocationId);
+      }
+
+      await this.firestoreService.updatePresenceById(this.presenceDocForSelectedDate.id, this.loggedInUserDocData.associatedWorkerClientId, {
+        locationId: selectedLocation ? selectedLocation.id : null,
+        locationName: selectedLocation ? selectedLocation.name : null
+      });
+    });
     this.presenceForm.controls.startTime.valueChanges.subscribe((value) => {
+      console.log('startTime new value:' + value);
       this.recalculateTotalTime();
+      this.updateStartTimeInPresence();
     });
 
     this.presenceForm.controls.endTime.valueChanges.subscribe((value) => {
+      console.log('endTime new value:' + value);
       this.recalculateTotalTime();
+      this.updateEndTimeInPresence();
     });
 
     //this.presenceForm.controls.date.setValue(new Date());
@@ -183,20 +228,31 @@ export class TaskComponent implements OnInit, OnDestroy {
   };
 
   tasksFilter(e: any, i: number): void {
-    console.log('taskFilter:' + i);
+    // const filterValue = event.target.value.toLowerCase();
+    // this.filteredLocationOptions = this.workerLocation.filter(o => o.name.toLowerCase().includes(filterValue));
+    //console.log('taskFilter:' + i, e.target.value.length);
     const filterValue = e.target.value.toLowerCase();
     this.taskRegns[i].filteredOptions = this.allTasksList.filter((o) =>
       o.name.toLowerCase().includes(filterValue)
     );
+
+    if (e.target.value.length <= 0) {
+      const breakOption: TaskOption = {
+        id: '',
+        name: '',
+        type: ''
+      };
+      this.onTaskSelectionInTaskRegn(breakOption, i)
+    }
     //this.updateTaskRegnsFromTo(); //TODO(Dhruv) -- see why this is needed
   }
- 
+
 
   breakSchemeSelector() {
-    this.breakSchemeSelected = breakScheme;
+    this.breakSchemeSelected = this.client.autoBreakOptions;
 
     this.totalTimeBreak = '00:00';
-    breakScheme.scheme.forEach(
+    this.breakSchemeSelected.scheme.forEach(
       (brk) =>
         (this.totalTimeBreak = time(this.totalTimeBreak)
           .add(brk.duration)
@@ -204,7 +260,7 @@ export class TaskComponent implements OnInit, OnDestroy {
     );
     //console.log(this.totalTimeBreak);
 
-    breakScheme.scheme.map((brk) => {
+    this.breakSchemeSelected.scheme.map((brk) => {
       brk.fromMoment = time(brk.from);
       brk.till = time(brk.from)
         .add(moment.duration(brk.duration))
@@ -215,18 +271,35 @@ export class TaskComponent implements OnInit, OnDestroy {
 
   fetchPresenceNTaskRegns() {
     this.presenceDocSubscription =
-      this.firestoreService.getPresenceDocForDate(this.dateSelected, this.loggedInUserDocData.associatedWorkerId, this.loggedInUserDocData.associatedWorkerClientId)
+      this.firestoreService.getPresenceDocForDate(this.dateSelected, this.loggedInUserDocData.associatedWorkerId,
+        this.loggedInUserDocData.associatedWorkerClientId)
         .subscribe(async (presenceDocs) => {
           //console.log(`Number of presenceDocs found:` + presenceDocs.length);
           if (presenceDocs.length > 0) {
             this.presenceDocForSelectedDate = presenceDocs[0];
             console.log('Presence ID:' + this.presenceDocForSelectedDate.id);
+            if (presenceDocs[0].locationId) {
+              this.presenceForm.controls.locationId.setValue(presenceDocs[0].locationId, {emitEvent: false});
+            }
+            if (presenceDocs[0].startTimestamp) {
+              const startTimestampStr = (moment(presenceDocs[0].startTimestamp.toDate()).tz(TIME_ZONE).format(TIME_FORMAT));
+              //console.log('Setting startTimestamp in UI:' + startTimestampStr);
+              if (this.presenceForm.controls.startTime.value !== startTimestampStr) {
+                this.presenceForm.controls.startTime.setValue(startTimestampStr, {emitEvent: false});
+              }
+            }
+            if (presenceDocs[0].presenceEndTimestamp) {
+              const endTimestampStr = (moment(presenceDocs[0].presenceEndTimestamp.toDate()).tz(TIME_ZONE).format(TIME_FORMAT));
+              if (this.presenceForm.controls.endTime.value !== endTimestampStr) {
+                this.presenceForm.controls.endTime.setValue(endTimestampStr, {emitEvent: false});
+              }
+            }
             this.continueListeningToTaskRegnChanges();
           } else if (!this.presenceDocForSelectedDate?.id) {
             console.log('Presence doc not found for selected date. Creating one...');
             if (!this.creatingPresenceDoc) {
               this.creatingPresenceDoc = true;
-              await this.firestoreService.createPresenceDocForSelectedDate(this.dateSelected, this.loggedInUserDocData);
+              await this.firestoreService.addPresenceDoc(this.dateSelected, this.loggedInUserDocData, this.worker);
               this.creatingPresenceDoc = false;
             }
           }
@@ -234,7 +307,6 @@ export class TaskComponent implements OnInit, OnDestroy {
   }
 
   tasksGenerator() {
-    this.breakSchemeSelector();
     let lastFrom = this.presenceForm.controls['startTime'].value;
     let proceed = true;
 
@@ -286,6 +358,7 @@ export class TaskComponent implements OnInit, OnDestroy {
           endTime: '',
           selectedOption: {id: '', name: '', type: ''},
           duration: durationTaskMinimum,
+          uuid: uuidv4()
         });
 
         if (
@@ -315,7 +388,8 @@ export class TaskComponent implements OnInit, OnDestroy {
           duration: durationBreakMinimum,
           endTime: '',
           startTime: '',
-          selectedOption: this.allTasksList[0] as TaskOption, //TODO -- check this logic - if it has to be a break type
+          selectedOption: this.allTasksList.filter(task => task.id === this.client.pauseTaskId)[0] as TaskOption,
+          uuid: uuidv4()
         });
         lastFrom = nextBreak.till ? nextBreak.till : '';
       } else {
@@ -327,6 +401,7 @@ export class TaskComponent implements OnInit, OnDestroy {
           endTime: '',
           selectedOption: {id: '', name: '', type: ''},
           duration: remaining,
+          uuid: uuidv4()
         });
         proceed = false;
       }
@@ -334,7 +409,7 @@ export class TaskComponent implements OnInit, OnDestroy {
     this.updateTaskRegnsFromTo(true);
   }
 
-  displayTaskName(value: any) {
+  displaySelectedName(value: any) {
     if (value) {
       return value.name;
     }
@@ -363,12 +438,14 @@ export class TaskComponent implements OnInit, OnDestroy {
         startTime: '',
         endTime: '',
         duration: remainingMinusPause,
+        uuid: uuidv4()
       });
     } else {
       this.taskRegns.splice(this.lastSelectedTaskRegn + 1, 0, {
         startTime: '',
         endTime: '',
         duration: remainingMinusPause,
+        uuid: uuidv4()
       });
     }
     this.updateTaskRegnsFromTo(true);
@@ -391,23 +468,24 @@ export class TaskComponent implements OnInit, OnDestroy {
     this.taskRegns.push({
       startTime: this.taskRegns[this.taskRegns.length - 1].startTime,
       endTime: '',
-      selectedOption: this.allTasksList[0],//TODO -- check this logic
+      selectedOption: this.allTasksList.filter(task => task.id === this.client.pauseTaskId)[0] as TaskOption,
       duration: this.totalTimeBreak,
+      uuid: uuidv4()
     });
     this.updateTaskRegnsFromTo(true);
   }
 
-  removeTaskRegn(i: number | 'AUTO') {
+  async removeTaskRegn(i: number | 'AUTO') {
     if (i !== 'AUTO') {
       if (this.taskRegns[i].id) {
-        this.firestoreService.deleteTaskRegn(this.taskRegns[i], this.presenceDocForSelectedDate.id);
+        await this.firestoreService.deleteTaskRegn(this.taskRegns[i], this.presenceDocForSelectedDate.id);
+        this.taskRegns.splice(Number(i), 1);
       }
-      this.taskRegns.splice(Number(i), 1);
     } else {
       if (this.taskRegns[0].id) {
-        this.firestoreService.deleteTaskRegn(this.taskRegns[0], this.presenceDocForSelectedDate.id);
+        await this.firestoreService.deleteTaskRegn(this.taskRegns[0], this.presenceDocForSelectedDate.id);
+        this.taskRegns.splice(0, 1);
       }
-      this.taskRegns.splice(0, 1);
     }
     this.updateTaskRegnsFromTo(true);
   }
@@ -427,14 +505,6 @@ export class TaskComponent implements OnInit, OnDestroy {
   changedTaskRegnDuration(e: any) {
     //console.log(this.taskRegns);
     this.updateTaskRegnsFromTo(true);
-  }
-
-  presenceFromBeforeChange(e: any) {
-    this.presenceStartTimeBefore = e.target.value;
-  }
-
-  presenceTillBeforeChange(e: any) {
-    this.presenceEndTimeBefore = e.target.value;
   }
 
   updateTaskRegnsFromTo(toBeSaved = false, updateFromIndex = 0) {
@@ -487,24 +557,36 @@ export class TaskComponent implements OnInit, OnDestroy {
       this.saveTasks(updateFromIndex);
     }
   }
-  selectedLocation:string='Select Location'
-  onchangeLocation(event:any){
-   
-    const worker:any = this.workerLocation.find(worker => worker.id === event);
-    
-    this.selectedLocation = worker?.name
-    console.log('change location',event)
+
+  selectedTask: any = []
+
+  onAutocompleteClosed(event: any, idx: any,inputTarget:any) {
+    if (event.length > 0)
+    inputTarget.value = this.taskRegns[idx].selectedOption?.name;
   }
 
+  getselectedId: string = ''
+
   async onTaskSelectionInTaskRegn($event: any, idx: any) {
-    let taskId = $event;
+    this.getselectedId = idx
+    let taskId = $event.id;
     let selectedTask: any = this.allTasksList.filter(task => task.id === taskId)[0];
+
 
     if (this.taskRegns[idx]?.selectedOption?.id === taskId) {//selected value is same as before - saving a call to backend
       return;
     }
     this.updateInProgress = true;
     try {
+    if (taskId === '') {
+      await this.firestoreService.updateTaskInTaskRegn(this.taskRegns[idx].id, {
+        id: '',
+        name: '',
+        type: ''
+      }, this.presenceDocForSelectedDate.id);
+        return;
+    }
+
       await this.firestoreService.updateTaskInTaskRegn(this.taskRegns[idx].id, {
         id: taskId,
         name: selectedTask.name,
@@ -516,6 +598,7 @@ export class TaskComponent implements OnInit, OnDestroy {
       console.log('Error in updating task regn:' + JSON.stringify(error));
       //TODO -- decide if error needs to be shown
     }
+    this.selectedTask = this.taskRegns[idx].selectedOption;
     this.updateTaskRegnsFromTo(false);
   }
 
@@ -524,43 +607,21 @@ export class TaskComponent implements OnInit, OnDestroy {
     const userId = this.loggedInUserDocData?.id;
     const workerName = this.firestoreService.clientWorker.worker.name ?? '';
     const workerId = this.firestoreService.clientWorker.worker.id;
-    const deviceType = 'browser';
-    const locationId = 'TODO';
-    const locationName = 'TODO';
-
-    // FS Location: client/{clientId}/presence/{presenceId}
-
-    /*const presence = {
-      userName,
-      userId,
-      workerName,
-      workerId,
-      deviceType,
-      locationId,
-      locationName,
-      isArchived: false,
-      date: moment(this.presence.controls['date'].value).toDate(),
-      startTimestamp: timeAddDate(
-        moment(this.presence.controls['date'].value).toDate(),
-        this.presence.controls['startTime'].value
-      ),
-      endTimestamp: timeAddDate(
-        moment(this.presence.controls['date'].value).toDate(),
-        this.presence.controls['endTime'].value
-      ),
-      durationTotal: timeAsSeconds(this.totalTimeSpecified),
-      durationBreaks: timeAsSeconds(this.totalTimeBreaksSpecified),
-      durationTasks: timeAsSeconds(this.totalTimeTasksSpecified),
-      creationTimestamp: new Date(),
-      updatedTimestamp: new Date(),
-    };*/
+    const deviceType = 'CLOCKWEB';
+    const locationId = this.presenceForm.controls.locationId.value ?? null;
+    let locationName: string | null = null;
+    if (locationId) {
+      locationName = this.clientLocations.filter(loc => loc.id === locationId)[0].name ?? '';
+    }
 
     // FS Location: client/{clientId}/presence/{presenceId}/taskRegnsToSave/{tasksId}
     let taskRegnsToSave: any = this.taskRegns.slice(updateFromIndex);
     taskRegnsToSave = taskRegnsToSave.map((taskRegn: any) => ({
+      uuid: taskRegn.uuid,
       id: taskRegn.id ?? null,
       taskName: taskRegn.selectedOption?.name ?? null,
       taskId: taskRegn.selectedOption?.id ?? null,
+      taskType: taskRegn.selectedOption?.type ?? null,
       createdByUserId: userId,
       createdByUserName: userName ?? '',
       workerName,
@@ -614,10 +675,16 @@ export class TaskComponent implements OnInit, OnDestroy {
     }
   }
 
-  async cancelTasks() {
+  async cancelTasksNPresence() {
     try {
+      this.updateInProgress = true;
       await this.firestoreService.deleteAllTaskRegnsNPresence(this.taskRegns, this.presenceDocForSelectedDate);
+      this.presenceForm.controls.locationId.setValue(null);
       this.taskRegns = [];
+      this.presenceDocSubscription?.unsubscribe();
+      this.taskRegnsSubscription?.unsubscribe();
+      this.tasksStateChangesSubscription?.unsubscribe();
+      this.fetchPresenceNTaskRegns();
       this.snackBar.open('Data for today has been cleared', '', {
         duration: 5000,
         panelClass: ['snackbar-success'],
@@ -625,8 +692,10 @@ export class TaskComponent implements OnInit, OnDestroy {
         verticalPosition: 'bottom',
       });
       console.log('Creating new presence doc...');
-      await this.firestoreService.addPresenceDoc(this.dateSelected, this.loggedInUserDocData);
+      await this.firestoreService.addPresenceDoc(this.dateSelected, this.loggedInUserDocData, this.worker);
+      this.updateInProgress = false;
     } catch (error: any) {
+      this.updateInProgress = false;
       this.snackBar.open('Error in clearing data for today:' + error.message, '', {
         duration: 5000,
         panelClass: ['snackbar-error'],
@@ -645,6 +714,7 @@ export class TaskComponent implements OnInit, OnDestroy {
   }
 
   continueListeningToTaskRegnChanges() {
+    let that = this;
     this.taskRegnsSubscription = this.firestoreService.getAllTaskRegnsForPresence(this.presenceDocForSelectedDate).subscribe(taskRegns => {
       this.taskRegnsSubscription?.unsubscribe();
       this.firstLoadOfTaskRegns(taskRegns)
@@ -656,10 +726,16 @@ export class TaskComponent implements OnInit, OnDestroy {
           for (const taskRegn of taskRegns) {
             switch (taskRegn.changeType) {
               case 'added': {
-                const addedIndex = this.taskRegns.findIndex(tr => tr.id === taskRegn.id);
+                const addedIndex = that.taskRegns.findIndex(tr => tr.id === taskRegn.id
+                  || (taskRegn.uuid && (tr.uuid === taskRegn.uuid)));
                 if (addedIndex === -1) {
                   anyTaskRegnAffected = true;
-                  this.taskRegns.push(this.mapTaskRegnFromFSToUI(taskRegn));
+                  that.taskRegns.push(this.mapTaskRegnFromFSToUI(taskRegn));
+                } else {
+                  if (!this.taskRegns[addedIndex].id) {
+                    that.taskRegns[addedIndex].id = taskRegn.id;
+                    that.taskRegns[addedIndex] = this.mapTaskRegnFromFSToUI(taskRegn);
+                  }
                 }
                 break;
               }
@@ -718,4 +794,27 @@ export class TaskComponent implements OnInit, OnDestroy {
     }
   }
 
+  async updateStartTimeInPresence() {
+    await this.firestoreService.updatePresenceById(this.presenceDocForSelectedDate.id, this.loggedInUserDocData.associatedWorkerClientId, {
+      startTimestamp: timeAddDate(
+        moment(this.presenceForm.controls['date'].value).toDate(),
+        this.presenceForm.controls['startTime'].value
+      ),
+      presenceDurationTotal: timeAsSeconds(this.totalTimeSpecified) ?? null,
+      presenceDurationBreaks: timeAsSeconds(this.totalTimeBreaksSpecified) ?? null,
+      presenceDurationTasks: timeAsSeconds(this.totalTimeTasksSpecified) ?? null,
+    });
+  }
+
+  async updateEndTimeInPresence() {
+    await this.firestoreService.updatePresenceById(this.presenceDocForSelectedDate.id, this.loggedInUserDocData.associatedWorkerClientId, {
+      presenceEndTimestamp: timeAddDate(
+        moment(this.presenceForm.controls['date'].value).tz(TIME_ZONE).toDate(),
+        this.presenceForm.controls['endTime'].value
+      ) ?? null,
+      presenceDurationTotal: timeAsSeconds(this.totalTimeSpecified) ?? null,
+      presenceDurationBreaks: timeAsSeconds(this.totalTimeBreaksSpecified) ?? null,
+      presenceDurationTasks: timeAsSeconds(this.totalTimeTasksSpecified) ?? null,
+    });
+  }
 }

@@ -7,7 +7,7 @@
 
 
 <!-- Install desktop -->
-<ng-container *ngIf="!isAppInstalled">
+<ng-container *ngIf="isAppInstalled">
     <ng-template #installDesktopApp>
         <div class="install-desktop">
             <div class="pwa-content">
@@ -19,7 +19,7 @@
                     <p class="mb-2">Click on the install icon button in the searchbar to download the application.</p>
                 </div>
                 <div>
-                    <mat-checkbox class="remind-me-btn" [(ngModel)]="checked" (click)="remindMeLater()">Remind me later</mat-checkbox>
+                    <mat-checkbox class="remind-me-btn" [(ngModel)]="checked" (click)="onRememberMeChange($event)">Remind me later</mat-checkbox>
                 </div>
                 <div class="text-right">
                     <button mat-flat-button (click)="installDesktop()" class="cstm-primary" color="primary">Install on Desktop</button>

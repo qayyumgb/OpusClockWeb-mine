@@ -9,7 +9,7 @@
                             <label class="d-block mb-3 font-xs-18">Set date</label>
                             <mat-form-field class="date-field w-100" appearance="outline">
                                 <mat-label>Choose a date</mat-label>
-                                <input matInput [matDatepickerFilter]="futureFilter" [matDatepicker]="picker" formControlName="date" />
+                                <input matInput required [matDatepickerFilter]="futureFilter" [matDatepicker]="picker" formControlName="date" />
                                 <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
                                 <mat-datepicker #picker></mat-datepicker>
                                 <mat-hint>{{dateHint}}</mat-hint>
@@ -17,24 +17,15 @@
                         </div>
                         <div class="flex-grow-1">
                             <label class="d-block mb-3 font-xs-18">Set location</label>
-                            <!-- <mat-form-field class="w-100" appearance="outline">
-                                <mat-label>Choose location</mat-label>
-                                <mat-select formControlName="location" (ngModelChange)="onchangeLocation($event)">
-                                  <mat-option>None</mat-option>
-                                  <mat-option *ngFor="let location of workerLocation" [value]="location">{{location.name}}</mat-option>
-                                </mat-select>
-                              </mat-form-field> -->
-
 
                               <mat-form-field class="task flex-grow-1 w-100" appearance="outline">
                                 <mat-label>Choose location</mat-label>
-                                <input type="text" matInput [matAutocomplete]="auto" autoActiveFirstOption="true" formControlName="location" (ngModelChange)="onchangeLocation($event)" (input)="filterLocation($event)"
-                                (focus)="filterLocation($event)" />
-                                <mat-autocomplete requireSelection #auto="matAutocomplete" [displayWith]="displayTaskName">
-                                    <ng-container *ngFor="let location of filteredLocationOptions;">
-                                        <mat-option [value]="location">{{location.name}}</mat-option>
-                                    </ng-container>
-                                </mat-autocomplete>
+                                <mat-select type="text" [disabled]="dateIsForPastNSaved()" formControlName="locationId">
+                                  <mat-option [value]="null">Select Location</mat-option>
+                                  <ng-container *ngFor="let location of clientLocations;">
+                                    <mat-option [value]="location.id">{{location.name}}</mat-option>
+                                  </ng-container>
+                                </mat-select>
                             </mat-form-field>
                         </div>
                     </div>
@@ -42,9 +33,9 @@
                         <label class="d-block mb-3 font-xs-18">Set time</label>
                         <div class="time-inputs">
                             <app-input-time label="From" (updatedTime)="presenceDayLengthUpdated($event, 'startTime')" class="flex-grow-1" formControlName="startTime" hint=""
-                            [disabled]="dateIsForPastNSaved()"></app-input-time>
+                             [isDisabled]="dateIsForPastNSaved()"></app-input-time>
                             <app-input-time label="Till" (updatedTime)="presenceDayLengthUpdated($event, 'endTime')" class="flex-grow-1" formControlName="endTime" hint=""
-                            [disabled]="dateIsForPastNSaved()"></app-input-time>
+                            [isDisabled]="dateIsForPastNSaved()"></app-input-time>
                         </div>
                     </div>
                 </div>
@@ -81,36 +72,32 @@
 
                 <div cdkDropList class="draggable-task-list" (cdkDropListDropped)="dropTask($event)">
                     <ng-container *ngFor="let taskRegn of taskRegns; let idx = index;trackBy: trackByTask">
-                        <mat-card cdkDrag class="draggable-task-card card-elevated mb-3" [class]="taskRegn.class"
+                        <mat-card [cdkDragDisabled]="dateIsForPastNSaved()" cdkDrag class="draggable-task-card card-elevated mb-3" [class]="taskRegn.class"
                         (click)="setLastSelectedTaskRegn(idx)">
                             <mat-card-content>
                                 <div class="draggable-item">
-                                    <mat-icon cdkDragHandle class="drag-handle flex-shrink-0">drag_indicator</mat-icon>
+                                    <mat-icon cdkDragHandle [class]="dateIsForPastNSaved()?'drag-handle flex-shrink-0 disabled':'drag-handle flex-shrink-0'">drag_indicator</mat-icon>
+                                        <app-input-time (updatedTime)="taskTimeUpdated($event, idx)" class="duration" label="Duration" [(ngModel)]="taskRegn.duration" hint="{{taskRegn.startTime}} - {{taskRegn.endTime}}" (change)="changedTaskRegnDuration($event)" [isDisabled]="dateIsForPastNSaved()"></app-input-time>
+                                        <mat-form-field class="task flex-grow-1" appearance="outline">
+                                            <mat-label>Task</mat-label>
+                                            <input type="text" #inputValue matInput [matAutocomplete]="auto" autoActiveFirstOption="true"
+                                                (input)="tasksFilter($event, idx)" (focus)="tasksFilter($event, idx)" (ngModelChange)="onTaskSelectionInTaskRegn($event, idx)"
+                                                [(ngModel)]="taskRegn.selectedOption" [disabled]="dateIsForPastNSaved()" />
+                                            <mat-autocomplete requireSelection #auto="matAutocomplete" [displayWith]="displaySelectedName" (closed)="onAutocompleteClosed(inputValue.value,idx,inputValue)">
+                                                <ng-container *ngFor="let option of taskFilterOption;">
+                                                    <mat-option [value]="option">{{option.name}}</mat-option>
+                                                </ng-container>
+                                            </mat-autocomplete>
+                                        </mat-form-field>
 
-                                    <app-input-time (updatedTime)="taskTimeUpdated($event, idx)" class="duration" label="Duration" [(ngModel)]="taskRegn.duration"
-                                                    hint="{{taskRegn.startTime}} - {{taskRegn.endTime}}"
-                                                    (change)="changedTaskRegnDuration($event)" [disabled]="dateIsForPastNSaved()"></app-input-time>
-
-                                    <mat-form-field class="task flex-grow-1" appearance="outline">
-                                        <mat-label>Task</mat-label>
-                                        <input type="text" matInput [matAutocomplete]="auto" autoActiveFirstOption="true"
-                                            (input)="tasksFilter($event, idx)" (focus)="tasksFilter($event, idx)" (ngModelChange)="onTaskSelectionInTaskRegn($event, idx)"
-                                            [(ngModel)]="taskRegn.selectedOption" [disabled]="dateIsForPastNSaved()" />
-                                        <mat-autocomplete requireSelection #auto="matAutocomplete" [displayWith]="displayTaskName">
-                                            <ng-container *ngFor="let option of taskRegn.filteredOptions;">
-                                                <mat-option [value]="option.id">{{option.name}}</mat-option>
-                                            </ng-container>
-                                        </mat-autocomplete>
-                                    </mat-form-field>
-
-                                    <button mat-icon-button class="mt-1 d-lg-block d-none" (click)="removeTaskRegn(idx)"
-                                        matTooltip="Remove selected task" [disabled]="updateInProgress || dateIsForPastNSaved()">
-                                        <mat-icon>remove</mat-icon>
-                                    </button>
-                                    <button mat-icon-button class="mt-1 d-lg-block d-none" (click)="addTaskRegn(idx)"
-                                        matTooltip="Add a task after this task" [disabled]="updateInProgress || dateIsForPastNSaved()">
-                                        <mat-icon>add</mat-icon>
-                                    </button>
+                                        <button mat-icon-button class="mt-1 d-lg-block d-none" (click)="removeTaskRegn(idx)"
+                                            matTooltip="Remove selected task" [disabled]="updateInProgress || dateIsForPastNSaved()">
+                                            <mat-icon>remove</mat-icon>
+                                        </button>
+                                        <button mat-icon-button class="mt-1 d-lg-block d-none" (click)="addTaskRegn(idx)"
+                                            matTooltip="Add a task after this task" [disabled]="updateInProgress || dateIsForPastNSaved()">
+                                            <mat-icon>add</mat-icon>
+                                        </button>
                                 </div>
                             </mat-card-content>
                         </mat-card>
@@ -159,11 +146,12 @@
     <mat-card class="time-registration__footer p-0">
         <mat-card-content>
             <div class="d-flex justify-content-end time-registration__btn-group">
-                <button mat-stroked-button (click)="cancelTasks()" [disabled]="!isCancellable() || updateInProgress || dateIsForPastNSaved()"><mat-icon class="info-icon">cancel</mat-icon> CANCEL</button>
-                <button mat-stroked-button [disabled]="saveDisabled || updateInProgress || presenceDocForSelectedDate.saved || !isTodaySelected" (click)="setPresenceAsSaved()">
+                <button mat-stroked-button (click)="cancelTasksNPresence()" [disabled]="!isCancellable() || updateInProgress || dateIsForPastNSaved()"><mat-icon class="info-icon">cancel</mat-icon> CANCEL</button>
+                <button mat-stroked-button [disabled]="saveDisabled || updateInProgress || presenceDocForSelectedDate?.saved || !isTodaySelected || !presenceDocForSelectedDate.locationId" (click)="setPresenceAsSaved()">
                     <mat-icon class="info-icon">save</mat-icon> SAVE</button>
             </div>
         </mat-card-content>
     </mat-card>
 
 </div>
+

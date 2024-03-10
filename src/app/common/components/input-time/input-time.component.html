@@ -1,7 +1,7 @@
-<mat-form-field [matMenuTriggerFor]="menu" (menuOpened)="setValuesOnInput()" class="till" appearance="outline">
+<mat-form-field [matMenuTriggerFor]="isDisabled?null:menu" (menuOpened)="setValuesOnInput()" class="till" appearance="outline">
     <mat-label>{{label}}</mat-label>
-    <input matInput type="time" [(ngModel)]="timeValue" (click)="$event.stopPropagation();" (ngModelChange)="onChange($event)" class="input" />
-    <button matSuffix mat-icon-button>
+    <input matInput type="time" [disabled]="isDisabled" [(ngModel)]="timeValue" (click)="$event.stopPropagation();" (ngModelChange)="onChange($event)" class="input" />
+    <button matSuffix mat-icon-button [disabled]="isDisabled">
         <!-- (click)="openTimeEditDialog($event)" -->
         <mat-icon class="material-symbols-outlined timer-icon">schedule</mat-icon>
     </button>
@@ -34,4 +34,7 @@
         </div>
         <div></div>
     </div>
+</mat-menu>
+<mat-menu style="opacity: 0;display: none;" #menu2="matMenu">
+
 </mat-menu>

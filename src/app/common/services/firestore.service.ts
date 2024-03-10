@@ -8,13 +8,13 @@ import firebase from 'firebase/compat/app';
 import {Timestamp} from 'firebase/firestore'
 import * as moment from 'moment-timezone';
 import {user} from '@angular/fire/auth';
+import {TIME_ZONE} from '../helpers/time';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FirestoreService {
   clientWorker: any;
-  workerLocation: any;
 
   constructor(private afs: AngularFirestore,
               private angularFireFunctions: AngularFireFunctions,
@@ -27,32 +27,28 @@ export class FirestoreService {
     this.authService.loggedInClientWorkerFromAuthService$.subscribe(clientWorker => {
       if (clientWorker) {
         this.clientWorker = clientWorker;
-        if (clientWorker.worker.locationIds && clientWorker.worker.locationIds.length > 0) {
-          this.afs.collection('clients').doc(clientWorker.client.id)
-            //Note - this assumption of using 1st location from array will be removed when location selection is added to ClockWeb
-            .collection('locations').doc(this.clientWorker.worker.locationIds[0])
-            .get().subscribe(locationDS => {
-            this.workerLocation = {
-              ...locationDS.data(),
-              id: this.clientWorker.worker.locationIds[0]
-            };
-          });
-        }
       }
     });
+  }
+
+  getWorkerByIdForClientId(workerId: string, clientId: string): Observable<any> {
+    return this.afs.collection('clients').doc(clientId).collection('workers').doc(workerId).get();
+  }
+
+  getClientById(clientId: string): Observable<any> {
+    return this.afs.collection('clients').doc(clientId).get();
   }
 
   getPresenceDocForDate(date: Date | null, workerId: string, clientId: string): Observable<any> {
     const fromMoment = Timestamp.fromDate(moment(date).startOf('day').toDate());
     const toMoment = Timestamp.fromDate(moment(date).endOf('day').toDate());
-    //Note - using creationTimestamp instead of startTimestamp in this query because when all regns are deleted onWriteRegn sets startTimestamp to null
     return this.afs
       .collection('clients')
       .doc(clientId)
       .collection('presences', (ref) =>
         ref.where('workerId', '==', workerId)
-          .where('creationTimestamp', '>=', fromMoment).where('creationTimestamp', '<', toMoment)
-          .orderBy('creationTimestamp', 'asc')
+          .where('startTimestamp', '>=', fromMoment).where('startTimestamp', '<', toMoment)
+          .orderBy('startTimestamp', 'asc')
           .limit(1)
       ).valueChanges({idField: 'id'});
   }
@@ -69,42 +65,35 @@ export class FirestoreService {
     }
   }
 
-  async createPresenceDocForSelectedDate(date: Date | null, userDocData: any): Promise<any> {
-    if (!this.clientWorker || !this.clientWorker.worker || !this.clientWorker.workerLocation) {
-      this.authService.loggedInClientWorkerFromAuthService$.subscribe(clientWorker => {
-        if (clientWorker) {
-          this.clientWorker = clientWorker;
-          if (clientWorker.worker.locationIds && clientWorker.worker.locationIds.length > 0) {
-            this.afs.collection('clients').doc(clientWorker.client.id)
-              //Note - this assumption of using 1st location from array will be removed when location selection is added to ClockWeb
-              .collection('locations').doc(this.clientWorker.worker.locationIds[0])
-              .get().subscribe(locationDS => {
-              this.workerLocation = {
-                ...locationDS.data(),
-                id: this.clientWorker.worker.locationIds[0]
-              };
-              return this.addPresenceDoc(date, userDocData);
-            });
-          }
-        }
-      });
-    } else {
-      return this.addPresenceDoc(date, userDocData);
-    }
+  testDate(){
+    this.afs.collection('workers').doc('00').update({
+      testTs: moment().tz('Europe/Amsterdam').set('hours', 7).set('minutes', 0).toDate()
+    })
   }
 
-  addPresenceDoc(date: Date | null, userDocData: any): Promise<any> {
+  addPresenceDoc(date: Date | null, userDocData: any, worker: any, startTime = '07:00', endTime = '16:00'): Promise<any> {
+    let startTimes = startTime.split(':');
+    let startHours = +startTimes[0];
+    let startMinutes = +startTimes[1];
+    let endTimes = endTime.split(':');
+    let endHours = +endTimes[0];
+    let endMinutes = +endTimes[1];
     return this.afs.collection('clients').doc(userDocData.associatedWorkerClientId).collection('presences').add({
       workerId: userDocData.associatedWorkerId,
-      workerName: this.clientWorker.worker.name,
+      workerName: worker.name ?? '',
+      workerGroupId: worker.workerGroupId ?? null,
+      workerGroupName: worker.workerGroupName ?? null,
       deviceType: 'CLOCKWEB',
-      locationId: this.workerLocation.id ?? null,
-      locationName: this.workerLocation.name ?? null,
+      locationId: null,
+      locationName: null,
       isArchived: false,
       clientId: userDocData.associatedWorkerClientId,
-      clientName: this.clientWorker.client.name,
-      startTimestamp: new Date(),
+      //clientName: this.clientWorker.client.name,
+      startTimestamp: moment().tz(TIME_ZONE).set('hours', startHours).set('minutes', startMinutes).set('seconds', 0).toDate(),
+      presenceEndTimestamp: moment().tz(TIME_ZONE).set('hours', endHours).set('minutes', endMinutes).set('seconds', 0).toDate(),
       date: date,
+      createdByUserId: userDocData.id ?? null,
+      createdByUserName: userDocData.name ?? null,
       creationTimestamp: firebase.firestore.FieldValue.serverTimestamp(),
       updatedTimestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
@@ -127,7 +116,7 @@ export class FirestoreService {
       .add(taskRegn);
   }
 
-  updateTaskInTaskRegn(taskRegnId: any, selectedOption:any, presenceId: string): Promise<any> {
+  updateTaskInTaskRegn(taskRegnId: any, selectedOption: any, presenceId: string): Promise<any> {
     return this.afs
       .collection('clients').doc(this.clientWorker.client.id)
       .collection('presences').doc(presenceId)
@@ -226,5 +215,14 @@ export class FirestoreService {
       .collection('clients').doc(this.clientWorker.client.id)
       .collection('presences').doc(presence.id)
       .delete();
+  }
+
+  getAllLocationsForClientId(clientId: string): Observable<any> {
+    return this.afs.collection('clients').doc(clientId).collection('locations').valueChanges({idField: 'id'});
+  }
+
+  updatePresenceById(presenceId: string, clientId: string, updateObject: any): Promise<any> {
+    updateObject.updatedTimestamp = firebase.firestore.FieldValue.serverTimestamp();
+    return this.afs.collection('clients').doc(clientId).collection('presences').doc(presenceId).update(updateObject);
   }
 }

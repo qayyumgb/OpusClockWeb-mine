@@ -27,7 +27,7 @@ export class LoginComponent {
     private snackBar: MatSnackBar
   ) {
     this.loggedInUserFromAuthServcSubConstuctor = this.authService.loggedInUserFromAuthService$.subscribe((userRecord) => {
-      console.log(JSON.stringify(userRecord))
+      //console.log(JSON.stringify(userRecord))
       if (userRecord && userRecord.associatedWorkerId) {
         this.router.navigate([`time-registration`]);
       } else if(userRecord) {

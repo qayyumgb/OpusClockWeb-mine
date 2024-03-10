@@ -38,6 +38,9 @@ export class AuthService {
     );
     this.loggedInUserFromAuthServiceSubscription = this.loggedInUserFromAuthService$.subscribe(userDocData => {
       this.loggedInUserDocData = userDocData;
+      if (!userDocData) {
+        return;
+      }
       this.afs.doc(`clients/${userDocData.associatedWorkerClientId}`).get().subscribe(clientDS => {
         let clientDocData: any = clientDS.data();
         this.afs.doc(`clients/${userDocData.associatedWorkerClientId}/workers/${userDocData.associatedWorkerId}`).get().subscribe(workerDS => {
@@ -78,9 +81,8 @@ export class AuthService {
 
   async signOut() {
     this.afAuth.signOut().then(() => {
-
       console.log('signed out');
-      this.router.navigate(['']);
+      this.router.navigate(['auth']);
     });
   }
 

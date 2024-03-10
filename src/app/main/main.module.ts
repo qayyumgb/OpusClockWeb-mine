@@ -9,6 +9,9 @@ import { InputTimeComponent } from '../common/components/input-time/input-time.c
 import { MainLayoutComponent } from './main-layout/main-layout.component';
 import { NavbarComponent } from '../common/navbar/navbar.component';
 import {AuthService} from '../common/services/auth.service';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatTooltipModule} from '@angular/material/tooltip';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 
 
 @NgModule({
@@ -23,6 +26,9 @@ import {AuthService} from '../common/services/auth.service';
     CommonModule,
     MainRoutingModule,
     SharedModule,
+    MatSnackBarModule,
+    MatTooltipModule,
+    MatCheckboxModule,
   ],
   providers: [
     AuthService,
