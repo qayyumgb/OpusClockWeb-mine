@@ -12,7 +12,7 @@ $md-primary: (
         200 : #a2adbd,
         300 : #7c8ca2,
         400 : #60748e,
-        500 : #445b7a,
+        500 : #00ffa7,
         600 : #3e5372,
         700 : #354967,
         800 : #2d405d,
@@ -233,7 +233,7 @@ $theme: map_merge(
   background-color: #142027 !important;
 }
 
-.mat-datepicker-content, .mat-mdc-menu-panel, div.mat-mdc-autocomplete-panel{
+.mat-datepicker-content, .mat-mdc-menu-panel, div.mat-mdc-autocomplete-panel, div.mat-mdc-select-panel{
   background-color: #17262f !important;
 }
 

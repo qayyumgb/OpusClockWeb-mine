@@ -1,0 +1,39 @@
+.time-off{
+
+    &__content{
+
+        .time-off-section{
+            width: 290px;
+        }
+
+        .time-off-day-section{
+            
+            .time-inputs{
+                display: flex;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+        }
+
+    }
+}
+
+label.title{
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.max-w-600{
+    max-width: 600px;
+}
+
+.main-color{
+    color: #00ffa7;
+}
+
+.period-working-days{
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    justify-content: flex-end;  
+}

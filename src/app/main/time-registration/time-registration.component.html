@@ -5,7 +5,26 @@
         </header>
         <main>
             <!-- Task component data -->
-            <app-task></app-task>
+
+            <div class="clock-content-tabs">
+                <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+                    <mat-tab>
+                      <ng-template mat-tab-label>
+                        <mat-icon class="mr-2">schedule</mat-icon>
+                        Tasks
+                      </ng-template>
+                        <app-task></app-task>
+                    </mat-tab>
+                    <mat-tab>
+                      <ng-template mat-tab-label>
+                        <mat-icon class="mr-2">beach_access</mat-icon>
+                        Time-off
+                      </ng-template>
+                      <app-time-off></app-time-off>
+                    </mat-tab>
+                  </mat-tab-group>
+            </div>
+            
         </main>
 
     </div>

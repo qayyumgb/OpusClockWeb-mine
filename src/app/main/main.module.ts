@@ -12,6 +12,7 @@ import {AuthService} from '../common/services/auth.service';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatCheckboxModule} from '@angular/material/checkbox';
+import { TimeOffComponent } from './time-registration/time-off/time-off.component';
 
 
 @NgModule({
@@ -20,7 +21,8 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
     TaskComponent,
     InputTimeComponent,
     MainLayoutComponent,
-    NavbarComponent
+    NavbarComponent,
+    TimeOffComponent
   ],
   imports: [
     CommonModule,

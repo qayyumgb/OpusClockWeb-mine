@@ -1,0 +1,89 @@
+<div class="time-off__wrapper pt-4">
+    <div class="time-off__content mt-3">
+        <div class="time-off__type mb-4">
+            <label class="d-block mb-3 font-xs-18 title">Time-off Type</label>
+            <mat-card class="time-registration__card">
+                <mat-card-content>
+                    <div class="time-off-section">
+                        <label class="d-block mb-3 font-xs-18">Set Time-off Type</label>
+                        <mat-form-field class="time-off-selector w-100" appearance="outline">
+                            <mat-label>Time-off type</mat-label>
+                            <mat-select [(ngModel)]="timeOfftypeSelected">
+                                <ng-container *ngFor="let timeOff of timeOffOptions">
+                                    <mat-option [value]="timeOff.id">{{timeOff.name}}</mat-option>
+                                </ng-container>
+
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+
+        <div class="time-off__day mb-4">
+            <label class="d-block mb-3 font-xs-18 title">Day</label>
+            <mat-card class="time-registration__card">
+                <mat-card-content>
+                    <div [formGroup]="day" class="time-off-day-section max-w-600">
+                        <div class="mb-3">
+                            <div class="flex-grow-1">
+                                <label class="d-block mb-3 font-xs-18">Set date</label>
+                                <mat-form-field class="date-field w-100" appearance="outline">
+                                    <mat-label>Choose a date</mat-label>
+                                    <input formControlName="date" matInput [matDatepicker]="picker1" />
+                                    <mat-datepicker-toggle matIconSuffix [for]="picker1"></mat-datepicker-toggle>
+                                    <mat-datepicker #picker1></mat-datepicker>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="d-block mb-3 font-xs-18">Set time</label>
+                            <div class="time-inputs">
+                                <app-input-time label="From"
+                                    (updatedTime)="presenceDayLengthUpdated($event, 'startTime')" class="flex-grow-1"
+                                    formControlName="startTime" hint=""
+                                    [isDisabled]="dateIsForPastNSaved()"></app-input-time>
+                                <app-input-time label="Till" (updatedTime)="presenceDayLengthUpdated($event, 'endTime')"
+                                    class="flex-grow-1" formControlName="endTime" hint=""
+                                    [isDisabled]="dateIsForPastNSaved()"></app-input-time>
+                            </div>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+
+        <div class="time-off__period mb-4">
+            <label class="d-block mb-3 font-xs-18 title">Period</label>
+            <mat-card class="time-registration__card">
+                <mat-card-content>
+                    <div class="time-off-day-section max-w-600">
+                        <div class="mb-3">
+                            <div class="flex-grow-1">
+                                <label class="d-block mb-3 font-xs-18">Set date range</label>
+                                <mat-form-field class="date-field w-100" appearance="outline">
+                                    <mat-label>Choose a date</mat-label>
+                                    <mat-date-range-input [formGroup]="period" [rangePicker]="picker4">
+                                        <input matStartDate formControlName="startDate" placeholder="Start date" />
+                                        <input matEndDate formControlName="endDate" placeholder="End date" />
+                                        <mat-icon matDateRangePickerIcon>date_range</mat-icon>
+                                    </mat-date-range-input>
+                                    <mat-date-range-picker #picker4></mat-date-range-picker>
+                                    <mat-error *ngIf="period.controls.startDate.hasError('matStartDateInvalid')">Invalid
+                                        start date</mat-error>
+                                    <mat-error *ngIf="period.controls.endDate.hasError('matEndDateInvalid')">Invalid end
+                                        date</mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+
+        <div class="text-right period-working-days">
+            <label>Working days is selected period:</label>
+            <h5 class="main-color">{{workingDays}}</h5>
+        </div>
+    </div>
+</div>
