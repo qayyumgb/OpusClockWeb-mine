@@ -39,6 +39,8 @@ export class TaskComponent implements OnInit, OnDestroy {
   dateHint: string;
   presenceTotalTime = '00:00';
   totalTimeBreaksSpecified = '00:00';
+  totalTimeBreaksPaidSpecified = '00:00';
+  totalTimeBreaksUnpaidSpecified = '00:00';
   totalTimeTasksSpecified = '00:00';
   totalTimeSpecified = '00:00';
   totalTimeRemaining = '00:00';
@@ -115,6 +117,7 @@ export class TaskComponent implements OnInit, OnDestroy {
     const filterValue = event.target.value.toLowerCase();
     this.filteredLocationOptions = this.clientLocations.filter(o => o.name.toLowerCase().includes(filterValue));
   }
+
   firstLoadOfTaskRegns(taskRegns: any) {
     //console.log('No of tasks:' + taskRegns?.length);
     this.taskRegns = taskRegns.map((taskRegn: any) => {
@@ -134,7 +137,8 @@ export class TaskComponent implements OnInit, OnDestroy {
       taskRegn.selectedOption = {
         id: taskRegn.taskId,
         name: taskRegn.taskName,
-        type: taskRegn.taskType
+        type: taskRegn.taskType,
+        func: taskRegn.taskFunction
       };
       taskRegn.name = taskRegn.taskName;
       return {
@@ -192,6 +196,11 @@ export class TaskComponent implements OnInit, OnDestroy {
         locationId: selectedLocation ? selectedLocation.id : null,
         locationName: selectedLocation ? selectedLocation.name : null
       });
+
+      await this.firestoreService.updateLocationForAllTaskRegns(this.presenceDocForSelectedDate.id, this.loggedInUserDocData.associatedWorkerClientId, {
+        locationId: selectedLocation ? selectedLocation.id : null,
+        locationName: selectedLocation ? selectedLocation.name : null
+      }, this.taskRegns);
     });
     this.presenceForm.controls.startTime.valueChanges.subscribe((value) => {
       console.log('startTime new value:' + value);
@@ -240,7 +249,8 @@ export class TaskComponent implements OnInit, OnDestroy {
       const breakOption: TaskOption = {
         id: '',
         name: '',
-        type: ''
+        type: '',
+        func: ''
       };
       this.onTaskSelectionInTaskRegn(breakOption, i)
     }
@@ -288,8 +298,8 @@ export class TaskComponent implements OnInit, OnDestroy {
                 this.presenceForm.controls.startTime.setValue(startTimestampStr, {emitEvent: false});
               }
             }
-            if (presenceDocs[0].presenceEndTimestamp) {
-              const endTimestampStr = (moment(presenceDocs[0].presenceEndTimestamp.toDate()).tz(TIME_ZONE).format(TIME_FORMAT));
+            if (presenceDocs[0].endTimestamp) {
+              const endTimestampStr = (moment(presenceDocs[0].endTimestamp.toDate()).tz(TIME_ZONE).format(TIME_FORMAT));
               if (this.presenceForm.controls.endTime.value !== endTimestampStr) {
                 this.presenceForm.controls.endTime.setValue(endTimestampStr, {emitEvent: false});
               }
@@ -299,7 +309,9 @@ export class TaskComponent implements OnInit, OnDestroy {
             console.log('Presence doc not found for selected date. Creating one...');
             if (!this.creatingPresenceDoc) {
               this.creatingPresenceDoc = true;
-              await this.firestoreService.addPresenceDoc(this.dateSelected, this.loggedInUserDocData, this.worker);
+              let dateWithoutTimezoneStr = moment(this.dateSelected).format('YYYY-MM-DD');
+              let dateWithClientTimezone = moment.tz(dateWithoutTimezoneStr, 'YYYY-MM-DD', TIME_ZONE).toDate();
+              await this.firestoreService.addPresenceDoc(dateWithClientTimezone, this.loggedInUserDocData, this.worker);
               this.creatingPresenceDoc = false;
             }
           }
@@ -336,7 +348,7 @@ export class TaskComponent implements OnInit, OnDestroy {
           .add(moment.duration(durationTaskMinimum))
           .format(TIME_FORMAT);
 
-        console.log({
+        /*console.log({
           presenceTotal: this.presenceTotalTime,
           nextBreak,
           durationTillBreak,
@@ -345,7 +357,7 @@ export class TaskComponent implements OnInit, OnDestroy {
           taskTill,
           taskFrom,
           lastFrom,
-        });
+        });*/
 
         if (
           time(lastFrom).add(durationTaskMinimum).format('X') >=
@@ -356,7 +368,7 @@ export class TaskComponent implements OnInit, OnDestroy {
         this.taskRegns.push({
           startTime: lastFrom ? lastFrom : '',
           endTime: '',
-          selectedOption: {id: '', name: '', type: ''},
+          selectedOption: {id: '', name: '', type: '', func: ''},
           duration: durationTaskMinimum,
           uuid: uuidv4()
         });
@@ -399,7 +411,7 @@ export class TaskComponent implements OnInit, OnDestroy {
         this.taskRegns.push({
           startTime: '',
           endTime: '',
-          selectedOption: {id: '', name: '', type: ''},
+          selectedOption: {id: '', name: '', type: '', func: ''},
           duration: remaining,
           uuid: uuidv4()
         });
@@ -508,12 +520,17 @@ export class TaskComponent implements OnInit, OnDestroy {
   }
 
   updateTaskRegnsFromTo(toBeSaved = false, updateFromIndex = 0) {
+    if (!this.presenceDocForSelectedDate) {
+      return;
+    }
     //console.log('To be saved:' + toBeSaved)
     let previousTill = time(this.presenceForm.controls['startTime'].value).format(
       TIME_FORMAT
     );
     this.totalTimeSpecified = '00:00';
     this.totalTimeBreaksSpecified = '00:00';
+    this.totalTimeBreaksPaidSpecified = '00:00';
+    this.totalTimeBreaksUnpaidSpecified = '00:00';
     this.totalTimeTasksSpecified = '00:00';
     this.pauseCount = 0;
 
@@ -527,6 +544,15 @@ export class TaskComponent implements OnInit, OnDestroy {
         this.totalTimeBreaksSpecified = time(this.totalTimeBreaksSpecified)
           .add(moment.duration(duration))
           .format(TIME_FORMAT);
+        if (taskRegn.selectedOption?.func === 'BREAK_PAID') {
+          this.totalTimeBreaksPaidSpecified = time(this.totalTimeBreaksPaidSpecified)
+            .add(moment.duration(duration))
+            .format(TIME_FORMAT);
+        } else if (taskRegn.selectedOption.func === 'BREAK_UNPAID') {
+          this.totalTimeBreaksUnpaidSpecified = time(this.totalTimeBreaksUnpaidSpecified)
+            .add(moment.duration(duration))
+            .format(TIME_FORMAT);
+        }
       } else {
         this.totalTimeTasksSpecified = time(this.totalTimeTasksSpecified)
           .add(moment.duration(duration))
@@ -555,14 +581,15 @@ export class TaskComponent implements OnInit, OnDestroy {
     this.saveDisabled = this.totalTimeRemaining !== '00:00' || emptyTasks > 0;
     if (toBeSaved) {
       this.saveTasks(updateFromIndex);
+      this.updateTotalsInPresence();
     }
   }
 
   selectedTask: any = []
 
-  onAutocompleteClosed(event: any, idx: any,inputTarget:any) {
+  onAutocompleteClosed(event: any, idx: any, inputTarget: any) {
     if (event.length > 0)
-    inputTarget.value = this.taskRegns[idx].selectedOption?.name;
+      inputTarget.value = this.taskRegns[idx].selectedOption?.name;
   }
 
   getselectedId: string = ''
@@ -578,20 +605,23 @@ export class TaskComponent implements OnInit, OnDestroy {
     }
     this.updateInProgress = true;
     try {
-    if (taskId === '') {
-      await this.firestoreService.updateTaskInTaskRegn(this.taskRegns[idx].id, {
-        id: '',
-        name: '',
-        type: ''
-      }, this.presenceDocForSelectedDate.id);
+      if (taskId === '') {
+        await this.firestoreService.updateTaskInTaskRegn(this.taskRegns[idx].id, {
+          id: '',
+          name: '',
+          type: '',
+          func: ''
+        }, this.presenceDocForSelectedDate.id);
         return;
-    }
+      }
 
       await this.firestoreService.updateTaskInTaskRegn(this.taskRegns[idx].id, {
         id: taskId,
         name: selectedTask.name,
-        type: selectedTask.type
+        type: selectedTask.type,
+        func: selectedTask.func
       }, this.presenceDocForSelectedDate.id);
+      await this.updateTotalsInPresence();
       this.updateInProgress = false;
     } catch (error: any) {
       this.updateInProgress = false;
@@ -622,6 +652,7 @@ export class TaskComponent implements OnInit, OnDestroy {
       taskName: taskRegn.selectedOption?.name ?? null,
       taskId: taskRegn.selectedOption?.id ?? null,
       taskType: taskRegn.selectedOption?.type ?? null,
+      taskFunction: taskRegn.selectedOption?.func ?? null,
       createdByUserId: userId,
       createdByUserName: userName ?? '',
       workerName,
@@ -650,7 +681,17 @@ export class TaskComponent implements OnInit, OnDestroy {
       await this.firestoreService.createNUpdateTasksUnderPresence(taskRegnsToSave, this.presenceDocForSelectedDate.id);
       console.log('Tasks are saved to Firestore');
     } catch (error: any) {
+      console.log('taskRegns:' + JSON.stringify(taskRegnsToSave));
+      console.log('error.message:' + error.message);
       console.log('Error in saving taskRegns:' + JSON.stringify(error));
+      console.log(JSON.stringify(Object.assign({},
+        error,
+        {      // Explicitly pull Error's non-enumerable properties
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        }
+      )))
     }
 
   }
@@ -692,7 +733,9 @@ export class TaskComponent implements OnInit, OnDestroy {
         verticalPosition: 'bottom',
       });
       console.log('Creating new presence doc...');
-      await this.firestoreService.addPresenceDoc(this.dateSelected, this.loggedInUserDocData, this.worker);
+      let dateWithoutTimezoneStr = moment(this.dateSelected).format('YYYY-MM-DD');
+      let dateWithClientTimezone = moment.tz(dateWithoutTimezoneStr, 'YYYY-MM-DD', TIME_ZONE).toDate();
+      await this.firestoreService.addPresenceDoc(dateWithClientTimezone, this.loggedInUserDocData, this.worker);
       this.updateInProgress = false;
     } catch (error: any) {
       this.updateInProgress = false;
@@ -786,7 +829,8 @@ export class TaskComponent implements OnInit, OnDestroy {
     taskRegn.selectedOption = {
       id: taskRegn.taskId,
       name: taskRegn.taskName,
-      type: taskRegn.taskType
+      type: taskRegn.taskType,
+      func: taskRegn.taskFunction
     };
     taskRegn.name = taskRegn.taskName;
     return {
@@ -800,21 +844,32 @@ export class TaskComponent implements OnInit, OnDestroy {
         moment(this.presenceForm.controls['date'].value).toDate(),
         this.presenceForm.controls['startTime'].value
       ),
-      presenceDurationTotal: timeAsSeconds(this.totalTimeSpecified) ?? null,
-      presenceDurationBreaks: timeAsSeconds(this.totalTimeBreaksSpecified) ?? null,
-      presenceDurationTasks: timeAsSeconds(this.totalTimeTasksSpecified) ?? null,
+      ...this.getDurationTotals()
     });
   }
 
   async updateEndTimeInPresence() {
     await this.firestoreService.updatePresenceById(this.presenceDocForSelectedDate.id, this.loggedInUserDocData.associatedWorkerClientId, {
-      presenceEndTimestamp: timeAddDate(
+      endTimestamp: timeAddDate(
         moment(this.presenceForm.controls['date'].value).tz(TIME_ZONE).toDate(),
         this.presenceForm.controls['endTime'].value
       ) ?? null,
-      presenceDurationTotal: timeAsSeconds(this.totalTimeSpecified) ?? null,
-      presenceDurationBreaks: timeAsSeconds(this.totalTimeBreaksSpecified) ?? null,
-      presenceDurationTasks: timeAsSeconds(this.totalTimeTasksSpecified) ?? null,
+      ...this.getDurationTotals()
     });
+  }
+
+  async updateTotalsInPresence() {
+    await this.firestoreService.updatePresenceById(this.presenceDocForSelectedDate.id,
+      this.loggedInUserDocData.associatedWorkerClientId, this.getDurationTotals());
+  }
+
+  getDurationTotals() {
+    return {
+      durationPresenceTotal: timeAsSeconds(this.totalTimeSpecified) ?? null,
+      durationBreaks: timeAsSeconds(this.totalTimeBreaksSpecified) ?? null,
+      durationBreaksPaid: timeAsSeconds(this.totalTimeBreaksPaidSpecified) ?? null,
+      durationBreaksUnpaid: timeAsSeconds(this.totalTimeBreaksUnpaidSpecified) ?? null,
+      durationTasks: timeAsSeconds(this.totalTimeTasksSpecified) ?? null
+    }
   }
 }

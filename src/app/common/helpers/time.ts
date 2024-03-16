@@ -14,7 +14,7 @@ export function dateIsToday(date: moment.Moment): boolean {
 
 export function timeAddDate(date: Date |null, time: string|null): Date {
   const t = moment(time, TIME_FORMAT);
-  return moment(date?.toLocaleString())
+  return moment(date)
     .tz(TIME_ZONE)
     .hours(t.hours())
     .minutes(t.minutes())

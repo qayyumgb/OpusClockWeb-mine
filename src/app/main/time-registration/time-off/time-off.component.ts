@@ -19,7 +19,7 @@ export class TimeOffComponent {
     { id: '2', name: 'Zwangerschapsverlof' },
     { id: '3', name: 'Bijzonderverlof' },
   ];
-  workingDays: number = 1;
+  workingDays: number = 12;
 
   day = new FormGroup({
     date: new FormControl<Date | null>(new Date()),

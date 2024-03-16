@@ -65,7 +65,7 @@ export class FirestoreService {
     }
   }
 
-  testDate(){
+  testDate() {
     this.afs.collection('workers').doc('00').update({
       testTs: moment().tz('Europe/Amsterdam').set('hours', 7).set('minutes', 0).toDate()
     })
@@ -89,8 +89,8 @@ export class FirestoreService {
       isArchived: false,
       clientId: userDocData.associatedWorkerClientId,
       //clientName: this.clientWorker.client.name,
-      startTimestamp: moment().tz(TIME_ZONE).set('hours', startHours).set('minutes', startMinutes).set('seconds', 0).toDate(),
-      presenceEndTimestamp: moment().tz(TIME_ZONE).set('hours', endHours).set('minutes', endMinutes).set('seconds', 0).toDate(),
+      startTimestamp: moment(date).tz(TIME_ZONE).set('hours', startHours).set('minutes', startMinutes).set('seconds', 0).toDate(),
+      endTimestamp: moment(date).tz(TIME_ZONE).set('hours', endHours).set('minutes', endMinutes).set('seconds', 0).toDate(),
       date: date,
       createdByUserId: userDocData.id ?? null,
       createdByUserName: userDocData.name ?? null,
@@ -126,6 +126,7 @@ export class FirestoreService {
         taskId: selectedOption.id,
         taskName: selectedOption.name,
         taskType: selectedOption.type,
+        taskFunction: selectedOption.func,
         updatedTimestamp: firebase.firestore.FieldValue.serverTimestamp()
       });
   }
@@ -223,6 +224,19 @@ export class FirestoreService {
 
   updatePresenceById(presenceId: string, clientId: string, updateObject: any): Promise<any> {
     updateObject.updatedTimestamp = firebase.firestore.FieldValue.serverTimestamp();
+    return this.afs.collection('clients').doc(clientId).collection('presences').doc(presenceId).update(updateObject);
+  }
+
+  async updateLocationForAllTaskRegns(presenceId: string, clientId: string, updateObject: any, taskRegns: any[]): Promise<any> {
+    updateObject.updatedTimestamp = firebase.firestore.FieldValue.serverTimestamp();
+    for (const taskRegn of taskRegns) {
+      try {
+        await this.afs.collection('clients').doc(clientId)
+          .collection('presences').doc(presenceId)
+          .collection('registrations').doc(taskRegn.id)
+          .update(updateObject)
+      } catch (error) {}//take no action as task could have been deleted before all tasks can be updated with new location
+    }
     return this.afs.collection('clients').doc(clientId).collection('presences').doc(presenceId).update(updateObject);
   }
 }

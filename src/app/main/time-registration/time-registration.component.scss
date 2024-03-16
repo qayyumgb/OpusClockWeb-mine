@@ -1,10 +1,7 @@
 ::ng-deep{
     .clock-content-tabs{
         .mat-mdc-tab .mdc-tab-indicator__content--underline{
-            width: 50%;
-            border-top-width: 5px;
-            border-top-left-radius: 5px;
-            border-top-right-radius: 5px;
+            border-top-width: 3px;
         }
     
         .mat-mdc-tab-labels{
