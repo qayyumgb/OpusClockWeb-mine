@@ -11,6 +11,55 @@
     body{
         font-size: 14px;
     }
+
+    .day-period-wrapper{
+
+        .mat-mdc-tab-group{
+            flex-direction: column !important;
+            gap: 0 !important;
+
+            .mat-mdc-tab-header{
+                border-bottom: 1px solid #243036 !important;
+                border-bottom-left-radius: 0 !important;
+                border-bottom-right-radius: 0 !important;
+                min-height: auto !important;
+                width: 100% !important;
+
+                .mat-mdc-tab-labels{
+                    flex-direction: row !important;
+                    
+                    .mat-mdc-tab{
+                        border: 0 !important;
+                        padding: 8px 8px !important;
+                        height: auto !important;
+                    }
+                }
+
+            }
+
+            .mat-mdc-tab-body-wrapper{
+                border-top-left-radius: 0 !important;
+                border-top-right-radius: 0 !important;
+            }
+        }
+
+        .day-vetical-tabs{
+            flex-direction: column;
+
+            .tab_icon{
+                margin-right: 0 !important;
+                margin-bottom: 0.75rem;
+            }
+
+            .tab_item_title{
+                align-items: center !important;
+
+                small{
+                    // display: none;
+                }
+            }
+        }
+    }
 }
 
 @media (max-width: 574.98px) {

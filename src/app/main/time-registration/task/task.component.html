@@ -146,7 +146,7 @@
     <mat-card class="time-registration__footer p-0">
         <mat-card-content>
             <div class="d-flex justify-content-end time-registration__btn-group">
-                <button mat-stroked-button (click)="cancelTasksNPresence()" [disabled]="!isCancellable() || updateInProgress || dateIsForPastNSaved()"><mat-icon class="info-icon">cancel</mat-icon> CANCEL</button>
+                <button mat-stroked-button class="mr-3" (click)="cancelTasksNPresence()" [disabled]="!isCancellable() || updateInProgress || dateIsForPastNSaved()"><mat-icon class="info-icon">cancel</mat-icon> CANCEL</button>
                 <button mat-stroked-button [disabled]="saveDisabled || updateInProgress || presenceDocForSelectedDate?.saved || !isTodaySelected || !presenceDocForSelectedDate.locationId" (click)="setPresenceAsSaved()">
                     <mat-icon class="info-icon">save</mat-icon> SAVE</button>
             </div>
