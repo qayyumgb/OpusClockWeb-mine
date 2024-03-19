@@ -3,7 +3,18 @@
     &__content{
 
         .time-off-section{
-            width: 290px;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+
+            .t_o_type{
+                flex: 1 1 0;
+            }
+
+            .t_o_notes{
+                flex: 2;
+                min-width: 300px;
+            }
         }
 
         .time-off-day-section{
@@ -45,17 +56,17 @@ label.title{
     height: 100%;
 
     .tab_icon{
-        width: 40px;
-    height: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 1px solid #393939;
-    border-radius: 6px;
-    background: rgb(27, 36, 41);
-    background: linear-gradient(333deg, rgba(27, 36, 41, 1) 0%, rgba(27, 36, 41, 1) 22%, rgba(27, 36, 41, 0.6251750700280112) 100%);
-    box-shadow: 0px 5px 7px -2px #000000 !important;
-    flex: 0 0 auto;
+        // width: 40px;
+        // height: 40px;
+        // display: flex;
+        // justify-content: center;
+        // align-items: center;
+        // border: 1px solid #393939;
+        // border-radius: 6px;
+        // background: rgb(27, 36, 41);
+        // background: linear-gradient(333deg, rgba(27, 36, 41, 1) 0%, rgba(27, 36, 41, 1) 22%, rgba(27, 36, 41, 0.6251750700280112) 100%);
+        // box-shadow: 0px 5px 7px -2px #000000 !important;
+        flex: 0 0 auto;
     }
 
     .tab_item_title{

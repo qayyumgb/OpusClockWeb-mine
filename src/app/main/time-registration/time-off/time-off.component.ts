@@ -10,9 +10,10 @@ import moment from 'moment';
 export class TimeOffComponent {
 
   dateToday: Date = new Date();
-
   toggleAccordion: string = 'DAY';
   timeOfftypeSelected: any;
+  timeOffNotes: any;
+
   timeOffOptions: any[] = [
     { id: '0', name: 'Holiday leave' },
     { id: '1', name: 'Parental leave' },
@@ -84,5 +85,9 @@ export class TimeOffComponent {
   }
   onCancelTimeOffPeriod(){
 
+  }
+
+  onInputChange(){
+    console.log("time off notes = ",this.timeOffNotes)
   }
 }
